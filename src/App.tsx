@@ -11,6 +11,10 @@ import HotelDetailsPage from '@/pages/HotelDetailsPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
+import BookingHistoryPage from '@/pages/account/BookingHistoryPage';
+import SupportPage from '@/pages/SupportPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import ProtectedRoute from '@/components/app/ProtectedRoute';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -31,6 +35,30 @@ function AppContent() {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/bookings"
+        element={(
+          <ProtectedRoute roles={['customer']}>
+            <BookingHistoryPage />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/support"
+        element={(
+          <ProtectedRoute roles={['customer', 'admin']}>
+            <SupportPage />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/admin"
+        element={(
+          <ProtectedRoute roles={['admin']}>
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        )}
+      />
       {/* 404 Fallback */}
       <Route path="*" element={<HomePage />} />
     </Routes>

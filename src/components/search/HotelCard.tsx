@@ -2,11 +2,11 @@ import React from 'react';
 import { Star, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Hotel } from '@/data/hotels';
 import { cn } from '@/lib/utils';
+import type { HotelSummary } from '@/types/api';
 
 interface HotelCardProps {
-  hotel: Hotel;
+  hotel: HotelSummary;
   horizontal?: boolean;
 }
 
@@ -15,13 +15,13 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, horizontal = false }) => {
     <motion.div
       whileHover={{ y: -8 }}
       className={cn(
-        "bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100",
-        horizontal ? "flex flex-col md:flex-row h-full" : "flex flex-col"
+        'bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100',
+        horizontal ? 'flex flex-col md:flex-row h-full' : 'flex flex-col',
       )}
     >
-      <Link to={`/hotel/${hotel.id}`} className={cn("relative overflow-hidden", horizontal ? "md:w-1/3 aspect-[4/3] md:aspect-auto" : "aspect-[16/10]")}>
-        <img 
-          src={hotel.image} 
+      <Link to={`/hotel/${hotel.id}`} className={cn('relative overflow-hidden', horizontal ? 'md:w-1/3 aspect-[4/3] md:aspect-auto' : 'aspect-[16/10]')}>
+        <img
+          src={hotel.heroImage ?? 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=800'}
           alt={hotel.name}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           referrerPolicy="no-referrer"
@@ -42,11 +42,11 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, horizontal = false }) => {
               ))}
             </div>
           </div>
-          
+
           <Link to={`/hotel/${hotel.id}`} className="block">
             <h3 className="text-xl font-bold text-gray-900 mb-1 hover:text-primary transition-colors line-clamp-1">{hotel.name}</h3>
           </Link>
-          
+
           <div className="flex items-center gap-1 text-gray-500 mb-3 text-sm">
             <MapPin className="w-4 h-4" />
             <span className="line-clamp-1">{hotel.location}</span>
@@ -64,7 +64,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, horizontal = false }) => {
         <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
           <div>
             <span className="text-xs text-gray-400 block">From per night</span>
-            <span className="text-2xl font-black text-gray-900">${hotel.price}</span>
+            <span className="text-2xl font-black text-gray-900">${hotel.basePrice}</span>
           </div>
           <Link to={`/hotel/${hotel.id}`}>
             <button className="bg-gray-900 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-primary transition-colors">
