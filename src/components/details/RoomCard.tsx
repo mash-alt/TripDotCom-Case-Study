@@ -5,9 +5,10 @@ import { motion } from 'motion/react';
 
 interface RoomCardProps {
   room: Room;
+  onBook: () => void;
 }
 
-const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
+const RoomCard: React.FC<RoomCardProps> = ({ room, onBook }) => {
   return (
     <motion.div 
       whileHover={{ scale: 1.01 }}
@@ -62,7 +63,9 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
             <p className="text-[10px] text-green-500 font-black mt-1 uppercase tracking-widest">Free Cancellation</p>
           </div>
           
-          <button className="w-full bg-primary text-white font-black py-3 rounded-2xl shadow-lg shadow-blue-500/20 hover:bg-primary-dark transition-all transform active:scale-95">
+          <button 
+            onClick={onBook}
+            className="w-full bg-primary text-white font-black py-3 rounded-2xl shadow-lg shadow-blue-500/20 hover:bg-primary-dark transition-all transform active:scale-95">
             Book Now
           </button>
         </div>

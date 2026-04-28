@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { hotels } from '@/data/hotels';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { hotels, Room } from '@/data/hotels';
 import Navbar from '@/components/layout/Navbar';
 import RoomCard from '@/components/details/RoomCard';
 import { MapPin, Star, Share2, Heart, ShieldCheck, Wifi, Coffee, Wind, Tv, Dumbbell, Waves, Car, Clock } from 'lucide-react';
@@ -8,8 +8,27 @@ import { motion } from 'motion/react';
 
 export default function HotelDetailsPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const hotel = hotels.find(h => h.id === id);
-  const [activeImage, setActiveImage] = useState(0);
+  
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  const nextWeek = new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0];
+
+  const [checkIn, setCheckIn] = useState(tomorrow);
+  const [checkOut, setCheckOut] = useState(nextWeek);
+
+  const handleBook = (room: Room) => {
+    if (!checkIn || !checkOut) {
+      alert("Please select valid check-in and check-out dates.");
+      return;
+    }
+    navigate('/checkout', { state: { hotel, room, checkIn, checkOut } });
+  };
+
+  const handleScrollToRooms = () => {
+    document.getElementById('available-rooms')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   if (!hotel) return <div>Hotel not found</div>;
 
@@ -68,20 +87,23 @@ export default function HotelDetailsPage() {
               src={hotel.images[0]} 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               referrerPolicy="no-referrer"
+              alt={`${hotel.name} view 1`}
             />
           </div>
           <div className="hidden md:block group overflow-hidden cursor-pointer">
             <img 
-              src={hotel.images[1]} 
+              src={hotel.images[1] || hotel.images[0]} 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               referrerPolicy="no-referrer"
+              alt={`${hotel.name} view 2`}
             />
           </div>
           <div className="hidden md:block group overflow-hidden cursor-pointer">
             <img 
-              src={hotel.images[2]} 
+              src={hotel.images[2] || hotel.images[0]} 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               referrerPolicy="no-referrer"
+              alt={`${hotel.name} view 3`}
             />
           </div>
           <div className="hidden md:block md:col-span-2 group relative overflow-hidden cursor-pointer">
@@ -89,6 +111,7 @@ export default function HotelDetailsPage() {
               src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1000" 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               referrerPolicy="no-referrer"
+              alt="More photos"
             />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
               <span className="text-white font-black text-2xl tracking-widest">+12 Photos</span>
@@ -135,11 +158,11 @@ export default function HotelDetailsPage() {
             </div>
 
             {/* Room Options */}
-            <div className="mb-12">
+            <div id="available-rooms" className="mb-12 scroll-mt-28">
               <h2 className="text-2xl font-black mb-8">Available Rooms</h2>
               <div className="space-y-4">
                 {hotel.rooms.map((room) => (
-                  <RoomCard key={room.id} room={room} />
+                  <RoomCard key={room.id} room={room} onBook={() => handleBook(room)} />
                 ))}
               </div>
             </div>
@@ -147,7 +170,7 @@ export default function HotelDetailsPage() {
 
           {/* Right Sidebar - Sticky Booking Box */}
           <div className="lg:col-span-4">
-            <div className="sticky top-40">
+            <div className="sticky top-28">
               <motion.div 
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -162,40 +185,59 @@ export default function HotelDetailsPage() {
                 </div>
 
                 <div className="space-y-4 mb-8">
-                  <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-100">
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-5 h-5 text-primary" />
-                      <div>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none">Arrival</span>
-                        <span className="text-sm font-bold">Apr 20, 2026</span>
+                  <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <Clock className="w-5 h-5 text-primary shrink-0" />
+                        <div>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none mb-1">Check-in</span>
+                          <input 
+                            type="date" 
+                            min={today}
+                            value={checkIn} 
+                            onChange={(e) => setCheckIn(e.target.value)} 
+                            className="bg-transparent text-sm font-bold text-gray-900 outline-none w-full cursor-pointer" 
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div className="w-[1px] h-8 bg-gray-200" />
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none">Departure</span>
-                        <span className="text-sm font-bold">Apr 25, 2026</span>
+                    <div className="w-full h-[1px] bg-gray-200" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <Clock className="w-5 h-5 text-primary shrink-0 opacity-0" />
+                        <div>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none mb-1">Check-out</span>
+                          <input 
+                            type="date" 
+                            min={checkIn || today}
+                            value={checkOut} 
+                            onChange={(e) => setCheckOut(e.target.value)} 
+                            className="bg-transparent text-sm font-bold text-gray-900 outline-none w-full cursor-pointer" 
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-100">
+                  <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-3">
                       <ShieldCheck className="w-5 h-5 text-green-500" />
                       <div>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none">Security</span>
-                        <span className="text-sm font-bold">TripStay Protection</span>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none mb-1">Security</span>
+                        <span className="text-sm font-bold text-gray-900">TripStay Protection</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <button className="w-full bg-primary text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/30 hover:bg-primary-dark transition-all transform active:scale-95 mb-4">
-                  Check Current Availability
+                <button 
+                  onClick={handleScrollToRooms}
+                  className="w-full bg-primary text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/30 hover:bg-primary-dark transition-all transform active:scale-[0.98] mb-4">
+                  Select a Room
                 </button>
                 <p className="text-center text-xs text-gray-400 font-bold uppercase tracking-tighter">You won't be charged yet</p>
                 
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full translate-x-12 -translate-y-12 blur-2xl opacity-60" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full translate-x-12 -translate-y-12 blur-2xl opacity-60 pointer-events-none" />
               </motion.div>
 
               <div className="mt-8 bg-blue-50 rounded-2xl p-6 border border-blue-100">
@@ -203,7 +245,7 @@ export default function HotelDetailsPage() {
                   <div className="p-2 bg-white rounded-xl shadow-sm"><ShieldCheck className="w-6 h-6 text-primary" /></div>
                   <div>
                     <h4 className="font-bold text-primary text-sm mb-1">Price Match Guarantee</h4>
-                    <p className="text-xs text-blue-600/80 font-medium leading-relaxed">Find a lower priceElsewhere? we'll match it and give you more rewards.</p>
+                    <p className="text-xs text-blue-600/80 font-medium leading-relaxed">Find a lower price elsewhere? We'll match it and give you more rewards.</p>
                   </div>
                 </div>
               </div>

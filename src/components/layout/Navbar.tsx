@@ -1,12 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Search, User, Menu, Globe, HelpCircle } from 'lucide-react';
+import { Search, User, Menu, Globe, HelpCircle, LogOut } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === '/';
+  
+  // Simulate authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    // Also listen to storage events to update navbar state across tabs if needed
+    const handleStorageChange = () => {
+      setIsAuthenticated(localStorage.getItem('isAuthenticated') === 'true');
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +31,12 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+    setShowDropdown(false);
+  };
 
   return (
     <nav 
@@ -45,26 +67,75 @@ export default function Navbar() {
           
           <div className="h-6 w-px bg-gray-200 mx-2 hidden lg:block"></div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 relative">
             <button className={cn(
               "p-2 rounded-full hover:bg-gray-100 transition-colors",
               !isScrolled && isHome && "hover:bg-white/10"
             )}>
               <Globe className="w-5 h-5" />
             </button>
-            <button className={cn(
-              "flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-2xl hover:bg-gray-50 transition-colors",
-              !isScrolled && isHome && "border-white/30 hover:bg-white/10"
-            )}>
-              <User className="w-5 h-5" />
-              <span className="font-semibold">Sign In</span>
-            </button>
+            
+            {isAuthenticated ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className={cn(
+                    "flex items-center gap-2 border border-gray-200 px-3 py-1.5 rounded-2xl hover:bg-gray-50 transition-colors",
+                    !isScrolled && isHome && "border-white/30 hover:bg-white/10"
+                  )}
+                >
+                  <div className="w-8 h-8 bg-blue-100 text-primary rounded-full flex items-center justify-center font-bold">
+                    JD
+                  </div>
+                  <div className="flex flex-col items-start pr-1">
+                     <span className={cn("text-xs font-bold leading-tight", !isScrolled && isHome ? "text-white" : "text-gray-900")}>John Doe</span>
+                     <span className={cn("text-[10px] font-medium leading-tight", !isScrolled && isHome ? "text-white/70" : "text-gray-500")}>Member</span>
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {showDropdown && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden py-2"
+                    >
+                      <button className="w-full text-left px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">
+                        My Bookings
+                      </button>
+                      <button className="w-full text-left px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">
+                        Account Settings
+                      </button>
+                      <div className="h-px bg-gray-100 my-2"></div>
+                      <button 
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link 
+                to="/login"
+                className={cn(
+                "flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-2xl hover:bg-gray-50 transition-colors",
+                !isScrolled && isHome && "border-white/30 hover:bg-white/10"
+              )}>
+                <User className="w-5 h-5" />
+                <span className="font-semibold">Sign In</span>
+              </Link>
+            )}
           </div>
         </div>
 
         {/* Mobile Menu */}
         <button className="md:hidden p-2 rounded-xl border border-gray-200">
-          <Menu className="w-6 h-6" />
+          <Menu className={cn("w-6 h-6", !isScrolled && isHome && "text-white")} />
         </button>
       </div>
     </nav>
