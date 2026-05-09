@@ -5,13 +5,14 @@ import * as paymentModel from '../models/paymentModel.js';
 import * as refundModel from '../models/refundModel.js';
 import * as loyaltyModel from '../models/loyaltyModel.js';
 import { ApiError } from '../utils/apiError.js';
-import { calculateMembershipLevel, calculateNights, isRefundEligible } from '../utils/booking.js';
+import { calculateMembershipLevel, calculateNights, calculateTripCoinsEarned, isRefundEligible } from '../utils/booking.js';
 
 export async function createBooking(input: {
   customerId: number;
   roomId: number;
   checkInDate: string;
   checkOutDate: string;
+  coinsRedeemed?: number;
 }) {
   const room = await roomModel.getRoomById(input.roomId);
 
@@ -26,9 +27,24 @@ export async function createBooking(input: {
     throw new ApiError(409, 'This room is already booked for the selected dates.');
   }
 
-  const totalPrice = nights * Number(room.pricePerNight);
+  let discountApplied = 0;
+  if (input.coinsRedeemed) {
+    const loyalty = await loyaltyModel.findLoyaltyByCustomerId(input.customerId);
+    if (!loyalty || loyalty.points < input.coinsRedeemed) {
+      throw new ApiError(400, 'Insufficient Trip Coins.');
+    }
+    discountApplied = Math.floor(input.coinsRedeemed / 100);
+  }
+
+  const finalPrice = Math.max(0, nights * Number(room.pricePerNight) - discountApplied);
 
   const bookingId = await withTransaction(async (connection) => {
+    if (input.coinsRedeemed) {
+      const loyalty = await loyaltyModel.findLoyaltyByCustomerId(input.customerId);
+      const nextPoints = (loyalty?.points ?? 0) - input.coinsRedeemed!;
+      await loyaltyModel.updateLoyalty(input.customerId, nextPoints, calculateMembershipLevel(nextPoints));
+    }
+
     return bookingModel.createBooking(
       {
         customerId: input.customerId,
@@ -36,7 +52,9 @@ export async function createBooking(input: {
         checkInDate: input.checkInDate,
         checkOutDate: input.checkOutDate,
         nights,
-        totalPrice,
+        totalPrice: finalPrice,
+        coinsRedeemed: input.coinsRedeemed ?? 0,
+        discountApplied,
       },
       connection,
     );
@@ -94,10 +112,6 @@ export async function confirmBookingPayment(input: {
       connection,
     );
     await bookingModel.updateBookingStatus(input.bookingId, 'Confirmed', connection);
-
-    const loyalty = await loyaltyModel.findLoyaltyByCustomerId(input.customerId);
-    const nextPoints = (loyalty?.points ?? 0) + Math.floor(input.amount / 10);
-    await loyaltyModel.updateLoyalty(input.customerId, nextPoints, calculateMembershipLevel(nextPoints));
   });
 
   return {
@@ -107,55 +121,72 @@ export async function confirmBookingPayment(input: {
 }
 
 export async function completeBooking(bookingId: number) {
-  await bookingModel.updateBookingStatus(bookingId, 'Completed');
+  const booking = await getBooking(bookingId);
+
+  await withTransaction(async (connection) => {
+    await bookingModel.updateBookingStatus(bookingId, 'Completed', connection);
+
+    const loyalty = await loyaltyModel.findLoyaltyByCustomerId(booking.customerId);
+    const currentTier = loyalty?.membershipLevel ?? 'Silver';
+    const pointsEarned = calculateTripCoinsEarned(Number(booking.totalPrice), currentTier);
+
+    const nextPoints = (loyalty?.points ?? 0) + pointsEarned;
+    await loyaltyModel.updateLoyalty(booking.customerId, nextPoints, calculateMembershipLevel(nextPoints));
+  });
+
   return getBooking(bookingId);
 }
 
 export async function cancelBooking(input: { bookingId: number; customerId?: number; reason: string; force?: boolean }) {
-  const booking = await getBooking(input.bookingId);
+  try {
+    const booking = await getBooking(input.bookingId);
 
-  if (input.customerId && booking.customerId !== input.customerId) {
-    throw new ApiError(403, 'This booking does not belong to the authenticated customer.');
+    if (input.customerId && booking.customerId !== input.customerId) {
+      throw new ApiError(403, 'This booking does not belong to the authenticated customer.');
+    }
+
+    if (booking.bookingStatus === 'Cancelled') {
+      throw new ApiError(400, 'Booking is already cancelled.');
+    }
+
+    if (!isRefundEligible(booking.checkInDate, booking.createdAt) && !input.force) {
+      throw new ApiError(400, 'This booking is no longer eligible for a refund (must be at least 48 hours before check-in or within the 30-minute grace period).');
+    }
+
+    const existingPayment = await paymentModel.getPaymentByBookingId(input.bookingId);
+
+    if (!existingPayment || existingPayment.paymentStatus !== 'Paid') {
+      throw new ApiError(400, 'Only paid bookings can be cancelled and refunded.');
+    }
+
+    await withTransaction(async (connection) => {
+      await refundModel.createRefund(
+        {
+          bookingId: input.bookingId,
+          amount: Number(booking.totalPrice),
+          refundStatus: 'Processed',
+          reason: input.reason,
+        },
+        connection,
+      );
+      await paymentModel.upsertPayment(
+        {
+          bookingId: input.bookingId,
+          amount: Number(booking.totalPrice),
+          paymentStatus: 'Refunded',
+          paymentMethod: existingPayment.paymentMethod,
+          transactionReference: existingPayment.transactionReference ?? `RF-${input.bookingId}-${Date.now()}`,
+        },
+        connection,
+      );
+      await bookingModel.updateBookingStatus(input.bookingId, 'Cancelled', connection);
+    });
+
+    return getBooking(input.bookingId);
+  } catch (err) {
+    console.error('Error in cancelBooking:', err);
+    throw err;
   }
-
-  if (booking.bookingStatus === 'Cancelled') {
-    throw new ApiError(400, 'Booking is already cancelled.');
-  }
-
-  if (!isRefundEligible(booking.checkInDate) && !input.force) {
-    throw new ApiError(400, 'This booking is no longer eligible for a refund.');
-  }
-
-  const existingPayment = await paymentModel.getPaymentByBookingId(input.bookingId);
-
-  if (!existingPayment || existingPayment.paymentStatus !== 'Paid') {
-    throw new ApiError(400, 'Only paid bookings can be cancelled and refunded.');
-  }
-
-  await withTransaction(async (connection) => {
-    await refundModel.createRefund(
-      {
-        bookingId: input.bookingId,
-        amount: Number(booking.totalPrice),
-        refundStatus: 'Processed',
-        reason: input.reason,
-      },
-      connection,
-    );
-    await paymentModel.upsertPayment(
-      {
-        bookingId: input.bookingId,
-        amount: Number(booking.totalPrice),
-        paymentStatus: 'Refunded',
-        paymentMethod: existingPayment.paymentMethod,
-        transactionReference: existingPayment.transactionReference ?? `RF-${input.bookingId}-${Date.now()}`,
-      },
-      connection,
-    );
-    await bookingModel.updateBookingStatus(input.bookingId, 'Cancelled', connection);
-  });
-
-  return getBooking(input.bookingId);
 }
 
 export async function deleteBooking(bookingId: number) {

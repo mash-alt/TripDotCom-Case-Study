@@ -5,6 +5,7 @@ import { bookingApi, loyaltyApi, refundApi } from '@/api/services';
 import { useAuth } from '@/hooks/useAuth';
 import type { Booking, LoyaltySummary } from '@/types/api';
 import { CalendarDays, BadgeDollarSign, ShieldCheck, RotateCcw } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function BookingHistoryPage() {
   const { user, token } = useAuth();
@@ -26,12 +27,16 @@ export default function BookingHistoryPage() {
   const handleCancel = async (bookingId: number) => {
     if (!token) return;
 
-    try {
-      const updated = await refundApi.request({ bookingId, reason: 'Customer cancelled from booking history' }, token);
-      setBookings((current) => current.map((booking) => (booking.bookingId === updated.bookingId ? updated : booking)));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to cancel booking.');
-    }
+    const promise = refundApi.request({ bookingId, reason: 'Customer cancelled from booking history' }, token);
+
+    toast.promise(promise, {
+      loading: 'Processing your refund request...',
+      success: (updated) => {
+        setBookings((current) => current.map((booking) => (booking.bookingId === updated.bookingId ? updated : booking)));
+        return 'Refund processed successfully!';
+      },
+      error: (err) => err instanceof Error ? err.message : 'Unable to cancel booking.',
+    });
   };
 
   return (

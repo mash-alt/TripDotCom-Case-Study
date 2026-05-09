@@ -16,6 +16,7 @@ import SupportPage from '@/pages/SupportPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import PopularHotelsPage from '@/pages/PopularHotelsPage';
 import ProtectedRoute from '@/components/app/ProtectedRoute';
+import { Toaster } from 'sonner';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -70,6 +71,7 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" expand={false} richColors />
       <ScrollToTop />
       <AppContent />
     </BrowserRouter>

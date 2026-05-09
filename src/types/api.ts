@@ -7,7 +7,7 @@ export interface SessionUser {
   email: string;
   phoneNumber?: string | null;
   loyaltyPoints?: number;
-  membershipLevel?: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+  membershipLevel?: 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Diamond+' | 'Black Diamond';
 }
 
 export interface AuthSession {
@@ -100,5 +100,5 @@ export interface SupportTicket {
 export interface LoyaltySummary {
   customerId: number;
   points: number;
-  membershipLevel: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+  membershipLevel: 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Diamond+' | 'Black Diamond';
 }

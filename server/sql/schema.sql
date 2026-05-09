@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS loyalty (
   loyalty_id INT PRIMARY KEY AUTO_INCREMENT,
   customer_id INT NOT NULL UNIQUE,
   points INT NOT NULL DEFAULT 0,
-  membership_level ENUM('Bronze', 'Silver', 'Gold', 'Platinum') NOT NULL DEFAULT 'Bronze',
+  membership_level ENUM('Silver', 'Gold', 'Platinum', 'Diamond', 'Diamond+', 'Black Diamond') NOT NULL DEFAULT 'Silver',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_loyalty_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
@@ -91,6 +91,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   nights INT NOT NULL,
   total_price DECIMAL(10, 2) NOT NULL,
   booking_status ENUM('PendingPayment', 'Confirmed', 'Cancelled', 'Completed') NOT NULL DEFAULT 'PendingPayment',
+  coins_redeemed INT NOT NULL DEFAULT 0,
+  discount_applied DECIMAL(10, 2) NOT NULL DEFAULT 0,
   cancelled_at TIMESTAMP NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_booking_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,

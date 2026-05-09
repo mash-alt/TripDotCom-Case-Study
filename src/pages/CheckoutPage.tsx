@@ -3,10 +3,11 @@ import { useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'motion/react';
 import { ShieldCheck, ChevronLeft, CreditCard, CheckCircle, Calendar, Bed, MapPin } from 'lucide-react';
-import { bookingApi, hotelApi, paymentApi, roomApi } from '@/api/services';
-import type { Booking, HotelDetails, Room } from '@/types/api';
+import { bookingApi, hotelApi, loyaltyApi, paymentApi, roomApi } from '@/api/services';
+import type { Booking, HotelDetails, LoyaltySummary, Room } from '@/types/api';
 import { useAuth } from '@/hooks/useAuth';
 import StatusMessage from '@/components/shared/StatusMessage';
+import { toast } from 'sonner';
 
 export default function CheckoutPage() {
   const [searchParams] = useSearchParams();
@@ -21,6 +22,8 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState<Booking | null>(null);
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
+  const [loyalty, setLoyalty] = useState<LoyaltySummary | null>(null);
+  const [useCoins, setUseCoins] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
@@ -33,14 +36,19 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!hotelId || !roomId) return;
-
-    void Promise.all([hotelApi.get(hotelId), roomApi.get(roomId)])
-      .then(([hotelData, roomData]) => {
+ 
+    void Promise.all([
+      hotelApi.get(hotelId),
+      roomApi.get(roomId),
+      user ? loyaltyApi.get(user.id, token!) : Promise.resolve(null)
+    ])
+      .then(([hotelData, roomData, loyaltyData]) => {
         setHotel(hotelData);
         setRoom(roomData);
+        setLoyalty(loyaltyData);
       })
       .catch((err: Error) => setError(err.message));
-  }, [hotelId, roomId]);
+  }, [hotelId, roomId, user, token]);
 
   useEffect(() => {
     if (!user) return;
@@ -61,7 +69,13 @@ export default function CheckoutPage() {
 
   const totalRoomPrice = nights * (room?.pricePerNight ?? 0);
   const taxesAndFees = Math.round(totalRoomPrice * 0.15);
-  const grandTotal = totalRoomPrice + taxesAndFees;
+  
+  const availableCoins = loyalty?.points ?? 0;
+  const maxRedeemableCoins = Math.min(availableCoins, Math.floor((totalRoomPrice + taxesAndFees) * 100));
+  const redeemableCoins = Math.floor(maxRedeemableCoins / 100) * 100;
+  const discount = useCoins ? redeemableCoins / 100 : 0;
+  
+  const grandTotal = totalRoomPrice + taxesAndFees - discount;
 
   if (!hotelId || !roomId || !checkIn || !checkOut) {
     return <Navigate to="/" replace />;
@@ -83,21 +97,39 @@ export default function CheckoutPage() {
     setError('');
 
     try {
-      const booking = await bookingApi.create({ roomId, checkInDate: checkIn, checkOutDate: checkOut }, token);
-      const payment = await paymentApi.pay(
-        {
-          bookingId: booking.bookingId,
-          amount: booking.totalPrice,
-          paymentMethod: 'card',
-          cardLast4: formData.cardNumber.slice(-4),
+      const promise = (async () => {
+        const booking = await bookingApi.create({
+          roomId,
+          checkInDate: checkIn,
+          checkOutDate: checkOut,
+          coinsRedeemed: useCoins ? redeemableCoins : 0
+        }, token);
+        const payment = await paymentApi.pay(
+          {
+            bookingId: booking.bookingId,
+            amount: booking.totalPrice,
+            paymentMethod: 'card',
+            cardLast4: formData.cardNumber.slice(-4),
+          },
+          token,
+        );
+        return { booking: payment.booking, reference: payment.payment?.transactionReference };
+      })();
+
+      toast.promise(promise, {
+        loading: 'Securing your reservation...',
+        success: (data) => {
+          setSuccess(data.booking);
+          setPaymentReference(data.reference ?? null);
+          void refreshSession();
+          return 'Booking confirmed successfully!';
         },
-        token,
-      );
-      setSuccess(payment.booking);
-      setPaymentReference(payment.payment?.transactionReference ?? null);
-      await refreshSession();
+        error: (err) => err instanceof Error ? err.message : 'Unable to complete checkout.',
+      });
+
+      await promise;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to complete checkout.');
+      // Error handled by toast.promise
     } finally {
       setIsSubmitting(false);
     }
@@ -198,6 +230,36 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {loyalty && loyalty.points >= 100 && (
+                 <div className="bg-blue-50 rounded-[2rem] p-8 shadow-sm border border-blue-100">
+                   <div className="flex items-center justify-between mb-4">
+                     <div className="flex items-center gap-3">
+                       <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                         <ShieldCheck className="w-6 h-6 text-primary" />
+                       </div>
+                       <div>
+                         <h3 className="font-bold text-gray-900">Trip Coins Rewards</h3>
+                         <p className="text-xs text-gray-500 font-medium">You have {loyalty.points} coins available</p>
+                       </div>
+                     </div>
+                     <button
+                       type="button"
+                       onClick={() => setUseCoins(!useCoins)}
+                       className={`px-6 py-2 rounded-xl font-bold transition-all ${
+                         useCoins ? 'bg-primary text-white' : 'bg-white text-primary border border-primary/20'
+                       }`}
+                     >
+                       {useCoins ? 'Applied' : 'Apply Coins'}
+                     </button>
+                   </div>
+                   {useCoins && (
+                     <p className="text-sm font-medium text-primary ml-1">
+                       Redeeming {redeemableCoins} coins for a ${discount} discount.
+                     </p>
+                   )}
+                 </div>
+               )}
+
               {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
               <button type="submit" disabled={isSubmitting} className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/30 hover:bg-primary-dark transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
@@ -242,6 +304,12 @@ export default function CheckoutPage() {
                 <h4 className="font-bold text-sm text-gray-900 mb-4">Price Summary</h4>
                 <div className="flex justify-between text-sm"><span className="text-gray-600">${room.pricePerNight} x {nights} night{nights > 1 ? 's' : ''}</span><span className="font-semibold">${totalRoomPrice}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Taxes & Fees (15%)</span><span className="font-semibold">${taxesAndFees}</span></div>
+                {useCoins && discount > 0 && (
+                   <div className="flex justify-between text-sm text-green-600 font-bold">
+                     <span>Trip Coins Discount</span>
+                     <span>-${discount}</span>
+                   </div>
+                 )}
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Booking confirmation threshold</span><span className="font-semibold">Paid in full</span></div>
                 <div className="border-t border-dashed border-gray-200 pt-3 mt-3 flex justify-between items-center"><span className="font-bold text-gray-900">Total</span><span className="text-2xl font-black text-gray-900">${grandTotal}</span></div>
               </div>

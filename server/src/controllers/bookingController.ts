@@ -6,19 +6,30 @@ export async function createBooking(request: Request, response: Response) {
     await bookingService.createBooking({
       ...request.body,
       customerId: request.user!.id,
+      coinsRedeemed: request.body.coinsRedeemed ? Number(request.body.coinsRedeemed) : undefined,
     }),
   );
 }
 
 export async function listCustomerBookings(request: Request, response: Response) {
-  const requestedCustomerId = Number(request.params.customerId);
-  const customerId = request.user!.role === 'admin' ? requestedCustomerId : request.user!.id;
-  response.json(await bookingService.listBookings(customerId));
+  try {
+    const requestedCustomerId = Number(request.params.customerId);
+    const customerId = request.user!.role === 'admin' ? requestedCustomerId : request.user!.id;
+    response.json(await bookingService.listBookings(customerId));
+  } catch (err) {
+    console.error('Error in listCustomerBookings:', err);
+    throw err;
+  }
 }
 
 export async function listAllBookings(request: Request, response: Response) {
-  const adminId = request.user!.id === 1 ? undefined : request.user!.id;
-  response.json(await bookingService.listBookings(undefined, adminId));
+  try {
+    const adminId = request.user!.id === 1 ? undefined : request.user!.id;
+    response.json(await bookingService.listBookings(undefined, adminId));
+  } catch (err) {
+    console.error('Error in listAllBookings:', err);
+    throw err;
+  }
 }
 
 export async function completeBooking(request: Request, response: Response) {

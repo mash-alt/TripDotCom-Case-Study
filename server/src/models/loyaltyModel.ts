@@ -5,13 +5,13 @@ export interface LoyaltyRow extends RowDataPacket {
   loyaltyId: number;
   customerId: number;
   points: number;
-  membershipLevel: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+  membershipLevel: 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Diamond+' | 'Black Diamond';
 }
 
 export async function createLoyalty(customerId: number, connection: PoolConnection) {
   await connection.execute<ResultSetHeader>(
     `INSERT INTO loyalty (customer_id, points, membership_level)
-     VALUES (?, 0, 'Bronze')`,
+     VALUES (?, 0, 'Silver')`,
     [customerId],
   );
 }

@@ -15,6 +15,8 @@ export interface BookingRow extends RowDataPacket {
   bookingStatus: 'PendingPayment' | 'Confirmed' | 'Cancelled' | 'Completed';
   paymentStatus: 'Pending' | 'Paid' | 'Failed' | 'Refunded' | null;
   refundStatus: 'Requested' | 'Approved' | 'Rejected' | 'Processed' | null;
+  coinsRedeemed: number;
+  discountApplied: number;
   createdAt: Date;
 }
 
@@ -34,6 +36,8 @@ export async function findBookingById(bookingId: number) {
       b.booking_status AS bookingStatus,
       p.payment_status AS paymentStatus,
       rf.refund_status AS refundStatus,
+      b.coins_redeemed AS coinsRedeemed,
+      b.discount_applied AS discountApplied,
       b.created_at AS createdAt
     FROM bookings b
     INNER JOIN rooms r ON r.room_id = b.room_id
@@ -63,6 +67,8 @@ export async function listBookingsForCustomer(customerId: number) {
       b.booking_status AS bookingStatus,
       p.payment_status AS paymentStatus,
       rf.refund_status AS refundStatus,
+      b.coins_redeemed AS coinsRedeemed,
+      b.discount_applied AS discountApplied,
       b.created_at AS createdAt
     FROM bookings b
     INNER JOIN rooms r ON r.room_id = b.room_id
@@ -91,6 +97,8 @@ export async function listAllBookings(adminId?: number) {
       b.booking_status AS bookingStatus,
       p.payment_status AS paymentStatus,
       rf.refund_status AS refundStatus,
+      b.coins_redeemed AS coinsRedeemed,
+      b.discount_applied AS discountApplied,
       b.created_at AS createdAt
     FROM bookings b
     INNER JOIN rooms r ON r.room_id = b.room_id
@@ -136,9 +144,18 @@ export async function createBooking(
 ) {
   const [result] = await connection.execute<ResultSetHeader>(
     `INSERT INTO bookings (
-      customer_id, room_id, check_in_date, check_out_date, nights, total_price, booking_status
-    ) VALUES (?, ?, ?, ?, ?, ?, 'PendingPayment')`,
-    [input.customerId, input.roomId, input.checkInDate, input.checkOutDate, input.nights, input.totalPrice],
+      customer_id, room_id, check_in_date, check_out_date, nights, total_price, booking_status, coins_redeemed, discount_applied
+    ) VALUES (?, ?, ?, ?, ?, ?, 'PendingPayment', ?, ?)`,
+    [
+      input.customerId,
+      input.roomId,
+      input.checkInDate,
+      input.checkOutDate,
+      input.nights,
+      input.totalPrice,
+      input.coinsRedeemed ?? 0,
+      input.discountApplied ?? 0,
+    ],
   );
 
   return result.insertId;

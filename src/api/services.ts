@@ -66,7 +66,7 @@ export const roomApi = {
 };
 
 export const bookingApi = {
-  create: (payload: { roomId: number; checkInDate: string; checkOutDate: string }, token: string) =>
+  create: (payload: { roomId: number; checkInDate: string; checkOutDate: string; coinsRedeemed?: number }, token: string) =>
     apiRequest<Booking>('/api/bookings', { method: 'POST', body: JSON.stringify(payload) }, token),
   listForCustomer: (customerId: number, token: string) =>
     apiRequest<Booking[]>(`/api/bookings/${customerId}`, {}, token),
