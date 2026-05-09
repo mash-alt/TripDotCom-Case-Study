@@ -32,6 +32,10 @@ export async function listAllBookings(request: Request, response: Response) {
   }
 }
 
+export async function checkInBooking(request: Request, response: Response) {
+  response.json(await bookingService.checkInBooking(Number(request.params.id)));
+}
+
 export async function completeBooking(request: Request, response: Response) {
   response.json(await bookingService.completeBooking(Number(request.params.id)));
 }
@@ -44,6 +48,12 @@ export async function cancelBooking(request: Request, response: Response) {
       reason: request.body.reason ?? 'Customer requested cancellation',
       force: request.user!.role === 'admin',
     }),
+  );
+}
+
+export async function updateInternalNotes(request: Request, response: Response) {
+  response.json(
+    await bookingService.updateInternalNotes(Number(request.params.id), request.body.notes)
   );
 }
 

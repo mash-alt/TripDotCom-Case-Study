@@ -42,7 +42,7 @@ export function calculateMembershipLevel(points: number) {
 }
 
 export function calculateTripCoinsEarned(amount: number, tier: string) {
-  // Base: ~50 Trip Coins per $100 spent (0.5 coins per $1)
+  // Base: ~50 Trip Coins per ₱100 spent (0.5 coins per ₱1)
   const baseRate = 0.5;
   const baseCoins = amount * baseRate;
 

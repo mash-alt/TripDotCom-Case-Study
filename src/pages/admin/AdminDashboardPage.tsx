@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import StatusMessage from '@/components/shared/StatusMessage';
-import { bookingApi, hotelApi, roomApi, supportApi } from '@/api/services';
+import { bookingApi, customerApi, hotelApi, roomApi, supportApi } from '@/api/services';
 import { useAuth } from '@/hooks/useAuth';
 import type { Booking, HotelDetails, HotelSummary, Room, SupportTicket } from '@/types/api';
 
@@ -40,6 +40,7 @@ export default function AdminDashboardPage() {
   const [hotels, setHotels] = useState<HotelSummary[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [selectedHotelId, setSelectedHotelId] = useState<number>(0);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [hotelForm, setHotelForm] = useState(emptyHotelForm);
@@ -53,11 +54,13 @@ export default function AdminDashboardPage() {
       hotelApi.list({ adminId: user?.id === 1 ? undefined : user?.id }),
       bookingApi.listAll(token),
       supportApi.list(token),
+      customerApi.list(token),
     ])
-      .then(([hotelData, bookingData, ticketData]) => {
+      .then(([hotelData, bookingData, ticketData, customerData]) => {
         setHotels(hotelData);
         setBookings(bookingData);
         setTickets(ticketData);
+        setCustomers(customerData);
         setSelectedHotelId(hotelData[0]?.id ?? 0);
       })
       .catch((err: Error) => setError(err.message));
@@ -80,6 +83,74 @@ export default function AdminDashboardPage() {
   const refreshHotels = async () => {
     const data = await hotelApi.list({ adminId: user?.id === 1 ? undefined : user?.id });
     setHotels(data);
+  };
+
+  const refreshBookings = async () => {
+    if (!token) return;
+    setBookings(await bookingApi.listAll(token));
+  };
+
+  const refreshTickets = async () => {
+    if (!token) return;
+    setTickets(await supportApi.list(token));
+  };
+
+  const handleCheckInBooking = async (bookingId: number) => {
+    if (!token || !window.confirm('Mark this guest as checked-in?')) return;
+    try {
+      await bookingApi.checkIn(bookingId, token);
+      await refreshBookings();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to check-in guest');
+    }
+  };
+
+  const handleCompleteBooking = async (bookingId: number) => {
+    if (!token || !window.confirm('Mark this booking as completed?')) return;
+    try {
+      await bookingApi.complete(bookingId, token);
+      await refreshBookings();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to complete booking');
+    }
+  };
+
+  const handleCancelBooking = async (bookingId: number) => {
+    if (!token) return;
+    const reason = window.prompt('Reason for administrative cancellation and refund:');
+    if (reason === null) return;
+    
+    try {
+      await bookingApi.cancel(bookingId, reason || 'Admin cancelled', token);
+      await refreshBookings();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to cancel booking');
+    }
+  };
+
+  const handleResolveTicket = async (ticketId: number, status: 'InProgress' | 'Resolved') => {
+    if (!token) return;
+    const notes = status === 'Resolved' ? (window.prompt('Resolution notes:') ?? '') : '';
+    
+    try {
+      await supportApi.resolve(ticketId, { status, resolutionNotes: notes }, token);
+      await refreshTickets();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update ticket');
+    }
+  };
+
+  const handleUpdateNotes = async (bookingId: number, currentNotes: string | null) => {
+    if (!token) return;
+    const notes = window.prompt('Internal operational notes (private to staff):', currentNotes ?? '');
+    if (notes === null) return;
+
+    try {
+      await bookingApi.updateNotes(bookingId, notes, token);
+      await refreshBookings();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update notes');
+    }
   };
 
   const handleHotelSubmit = async (e: FormEvent) => {
@@ -245,7 +316,7 @@ export default function AdminDashboardPage() {
                   <div key={room.id} className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
                     <div>
                       <p className="font-bold text-gray-900">{room.name}</p>
-                      <p className="text-sm text-gray-500">${room.pricePerNight} per night</p>
+                      <p className="text-sm text-gray-500">₱{room.pricePerNight.toLocaleString()} per night</p>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setRoomForm({
@@ -272,17 +343,45 @@ export default function AdminDashboardPage() {
 
             <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
               <h2 className="text-2xl font-black text-gray-900 mb-4">Booking Management</h2>
-              <div className="space-y-3">
-                {bookings.slice(0, 8).map((booking) => (
+              <div className="space-y-4">
+                {bookings.slice(0, 15).map((booking) => (
                   <div key={booking.bookingId} className="rounded-2xl bg-gray-50 px-4 py-3">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="font-bold text-gray-900">#{booking.bookingId} {booking.hotelName}</p>
-                        <p className="text-sm text-gray-500">{booking.roomName} • {booking.checkInDate} → {booking.checkOutDate}</p>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="font-bold text-gray-900">#{booking.bookingId} {booking.hotelName}</p>
+                          <p className="text-sm text-gray-500 font-medium">{booking.roomName} • {booking.checkInDate} → {booking.checkOutDate}</p>
+                          <div className="mt-2 p-2 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Guest Identity</p>
+                            <p className="text-xs font-bold text-gray-900">{booking.customerName}</p>
+                            <p className="text-[10px] font-medium text-gray-500">{booking.customerEmail}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-bold ${booking.bookingStatus === 'Confirmed' ? 'text-green-600' : 'text-gray-900'}`}>{booking.bookingStatus}</p>
+                          <p className="text-sm text-gray-500">{booking.paymentStatus}</p>
+                          <p className="text-xs font-black">₱{booking.totalPrice.toLocaleString()}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-900">{booking.bookingStatus}</p>
-                        <p className="text-sm text-gray-500">{booking.paymentStatus}</p>
+                      
+                      {booking.internalNotes && (
+                        <div className="bg-orange-50 border border-orange-100 p-3 rounded-xl">
+                          <p className="text-[10px] text-orange-400 font-black uppercase tracking-wider mb-1">Internal Staff Notes</p>
+                          <p className="text-xs text-orange-800 font-medium italic">"{booking.internalNotes}"</p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 pt-2 border-t border-gray-200">
+                        <button onClick={() => handleUpdateNotes(booking.bookingId, booking.internalNotes)} className="flex-1 bg-white text-gray-500 text-xs font-bold py-2 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors">Notes</button>
+                        {booking.bookingStatus === 'Confirmed' && (
+                          <>
+                            <button onClick={() => handleCheckInBooking(booking.bookingId)} className="flex-1 bg-primary text-white text-xs font-bold py-2 rounded-xl shadow-lg shadow-blue-500/20 hover:bg-primary-dark transition-colors">Check-in</button>
+                            <button onClick={() => handleCancelBooking(booking.bookingId)} className="flex-1 bg-red-50 text-red-600 text-xs font-bold py-2 rounded-xl border border-red-100 hover:bg-red-100 transition-colors">Refund</button>
+                          </>
+                        )}
+                        {booking.bookingStatus === 'CheckedIn' && (
+                          <button onClick={() => handleCompleteBooking(booking.bookingId)} className="flex-1 bg-green-600 text-white text-xs font-bold py-2 rounded-xl shadow-lg shadow-green-500/20 hover:bg-green-700 transition-colors">Mark Completed</button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -291,16 +390,53 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
-              <h2 className="text-2xl font-black text-gray-900 mb-4">Support Tickets</h2>
+              <h2 className="text-2xl font-black text-gray-900 mb-4">Guest Directory</h2>
               <div className="space-y-3">
-                {tickets.slice(0, 6).map((ticket) => (
-                  <div key={ticket.supportId} className="rounded-2xl bg-gray-50 px-4 py-3">
+                {customers.map((guest) => (
+                  <div key={guest.id} className="rounded-2xl bg-gray-50 px-4 py-3 flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-gray-900">{guest.fullName}</p>
+                      <p className="text-xs text-gray-500">{guest.email}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black uppercase text-primary">{guest.membershipLevel}</p>
+                      <p className="text-xs font-bold text-gray-900">{guest.loyaltyPoints} pts</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
+              <h2 className="text-2xl font-black text-gray-900 mb-4">Support Tickets</h2>
+              <div className="space-y-4">
+                {tickets.slice(0, 10).map((ticket) => (
+                  <div key={ticket.supportId} className="rounded-2xl bg-gray-50 px-4 py-4 space-y-3">
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="font-bold text-gray-900">{ticket.subject}</p>
-                        <p className="text-sm text-gray-500">{ticket.status} • Customer #{ticket.customerId}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
+                            ticket.status === 'Open' ? 'bg-blue-100 text-blue-700' : 
+                            ticket.status === 'InProgress' ? 'bg-orange-100 text-orange-700' : 
+                            'bg-green-100 text-green-700'
+                          }`}>{ticket.status}</span>
+                          <span className="text-xs text-gray-500">Customer #{ticket.customerId}</span>
+                        </div>
                       </div>
                     </div>
+                    <p className="text-sm text-gray-600 italic bg-white/50 p-2 rounded-xl">"{ticket.message}"</p>
+                    {ticket.resolutionNotes && (
+                      <p className="text-xs text-green-700 font-bold bg-green-50 p-2 rounded-xl border border-green-100">Notes: {ticket.resolutionNotes}</p>
+                    )}
+                    {ticket.status !== 'Resolved' && (
+                      <div className="flex gap-2">
+                        {ticket.status === 'Open' && (
+                          <button onClick={() => handleResolveTicket(ticket.supportId, 'InProgress')} className="flex-1 bg-white text-orange-600 text-[10px] font-black uppercase py-2 rounded-xl border border-orange-100">Take Ticket</button>
+                        )}
+                        <button onClick={() => handleResolveTicket(ticket.supportId, 'Resolved')} className="flex-1 bg-primary text-white text-[10px] font-black uppercase py-2 rounded-xl shadow-lg shadow-blue-500/20">Resolve</button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

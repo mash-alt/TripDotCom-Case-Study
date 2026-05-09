@@ -8,6 +8,7 @@ export interface SessionUser {
   phoneNumber?: string | null;
   loyaltyPoints?: number;
   membershipLevel?: 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Diamond+' | 'Black Diamond';
+  createdAt?: string | Date;
 }
 
 export interface AuthSession {
@@ -65,9 +66,13 @@ export interface Booking {
   checkOutDate: string;
   nights: number;
   totalPrice: number;
-  bookingStatus: 'PendingPayment' | 'Confirmed' | 'Cancelled' | 'Completed';
+  bookingStatus: 'PendingPayment' | 'Confirmed' | 'CheckedIn' | 'Cancelled' | 'Completed';
   paymentStatus: 'Pending' | 'Paid' | 'Failed' | 'Refunded' | null;
   refundStatus: 'Requested' | 'Approved' | 'Rejected' | 'Processed' | null;
+  discountApplied: number;
+  customerName: string;
+  customerEmail: string;
+  internalNotes: string | null;
   createdAt: string;
 }
 

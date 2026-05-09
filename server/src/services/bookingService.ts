@@ -33,16 +33,17 @@ export async function createBooking(input: {
     if (!loyalty || loyalty.points < input.coinsRedeemed) {
       throw new ApiError(400, 'Insufficient Trip Coins.');
     }
-    discountApplied = Math.floor(input.coinsRedeemed / 100);
+    // 100 points = ₱50
+    discountApplied = (input.coinsRedeemed / 100) * 50;
   }
 
   const finalPrice = Math.max(0, nights * Number(room.pricePerNight) - discountApplied);
 
   const bookingId = await withTransaction(async (connection) => {
     if (input.coinsRedeemed) {
-      const loyalty = await loyaltyModel.findLoyaltyByCustomerId(input.customerId);
+      const loyalty = await loyaltyModel.findLoyaltyByCustomerId(input.customerId, connection);
       const nextPoints = (loyalty?.points ?? 0) - input.coinsRedeemed!;
-      await loyaltyModel.updateLoyalty(input.customerId, nextPoints, calculateMembershipLevel(nextPoints));
+      await loyaltyModel.updateLoyalty(input.customerId, nextPoints, calculateMembershipLevel(nextPoints), connection);
     }
 
     return bookingModel.createBooking(
@@ -112,6 +113,14 @@ export async function confirmBookingPayment(input: {
       connection,
     );
     await bookingModel.updateBookingStatus(input.bookingId, 'Confirmed', connection);
+
+    // Award Trip Coins immediately upon successful payment
+    const loyalty = await loyaltyModel.findLoyaltyByCustomerId(input.customerId, connection);
+    const currentTier = loyalty?.membershipLevel ?? 'Silver';
+    const pointsEarned = calculateTripCoinsEarned(Number(booking.totalPrice), currentTier);
+
+    const nextPoints = (loyalty?.points ?? 0) + pointsEarned;
+    await loyaltyModel.updateLoyalty(input.customerId, nextPoints, calculateMembershipLevel(nextPoints), connection);
   });
 
   return {
@@ -120,18 +129,18 @@ export async function confirmBookingPayment(input: {
   };
 }
 
+export async function checkInBooking(bookingId: number) {
+  await withTransaction(async (connection) => {
+    await bookingModel.updateBookingStatus(bookingId, 'CheckedIn', connection);
+  });
+  return getBooking(bookingId);
+}
+
 export async function completeBooking(bookingId: number) {
   const booking = await getBooking(bookingId);
 
   await withTransaction(async (connection) => {
     await bookingModel.updateBookingStatus(bookingId, 'Completed', connection);
-
-    const loyalty = await loyaltyModel.findLoyaltyByCustomerId(booking.customerId);
-    const currentTier = loyalty?.membershipLevel ?? 'Silver';
-    const pointsEarned = calculateTripCoinsEarned(Number(booking.totalPrice), currentTier);
-
-    const nextPoints = (loyalty?.points ?? 0) + pointsEarned;
-    await loyaltyModel.updateLoyalty(booking.customerId, nextPoints, calculateMembershipLevel(nextPoints));
   });
 
   return getBooking(bookingId);
@@ -180,6 +189,12 @@ export async function cancelBooking(input: { bookingId: number; customerId?: num
         connection,
       );
       await bookingModel.updateBookingStatus(input.bookingId, 'Cancelled', connection);
+
+      // Deduct points earned from this booking if it was already paid
+      const loyalty = await loyaltyModel.findLoyaltyByCustomerId(booking.customerId, connection);
+      const pointsToDeduct = calculateTripCoinsEarned(Number(booking.totalPrice), loyalty?.membershipLevel ?? 'Silver');
+      const nextPoints = Math.max(0, (loyalty?.points ?? 0) - pointsToDeduct);
+      await loyaltyModel.updateLoyalty(booking.customerId, nextPoints, calculateMembershipLevel(nextPoints), connection);
     });
 
     return getBooking(input.bookingId);
@@ -203,6 +218,11 @@ export async function deletePayment(paymentId: number) {
 
 export async function listRefunds() {
   return refundModel.listRefunds();
+}
+
+export async function updateInternalNotes(bookingId: number, notes: string) {
+  await bookingModel.updateInternalNotes(bookingId, notes);
+  return getBooking(bookingId);
 }
 
 export async function deleteRefund(refundId: number) {

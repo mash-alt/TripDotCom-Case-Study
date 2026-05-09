@@ -21,13 +21,14 @@ export default function FilterSidebar({ maxPrice, stars, onMaxPriceChange, onSta
           <h4 className="text-sm font-bold text-gray-900 mb-4 tracking-tight uppercase">Price Range</h4>
           <div className="space-y-4">
             <div className="flex items-center justify-between text-sm text-gray-500">
-              <span>$0</span>
-              <span>$1000+</span>
+              <span>₱0</span>
+              <span>₱50,000+</span>
             </div>
             <input
               type="range"
               min={0}
-              max={1000}
+              max={50000}
+              step={500}
               value={maxPrice}
               onChange={(e) => onMaxPriceChange(Number(e.target.value))}
               className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
@@ -35,11 +36,11 @@ export default function FilterSidebar({ maxPrice, stars, onMaxPriceChange, onSta
             <div className="flex gap-2">
               <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-2 text-sm">
                 <span className="text-[10px] text-gray-400 block uppercase font-bold">Min</span>
-                <span className="font-semibold">$0</span>
+                <span className="font-semibold">₱0</span>
               </div>
               <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-2 text-sm">
                 <span className="text-[10px] text-gray-400 block uppercase font-bold">Max</span>
-                <span className="font-semibold">${maxPrice}</span>
+                <span className="font-semibold">₱{maxPrice.toLocaleString()}</span>
               </div>
             </div>
           </div>

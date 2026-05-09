@@ -15,8 +15,8 @@ export default function CheckoutPage() {
   const { token, user, refreshSession } = useAuth();
   const hotelId = Number(searchParams.get('hotelId'));
   const roomId = Number(searchParams.get('roomId'));
-  const checkIn = searchParams.get('checkIn') ?? '';
-  const checkOut = searchParams.get('checkOut') ?? '';
+  const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') ?? '');
+  const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') ?? '');
   const [hotel, setHotel] = useState<HotelDetails | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,6 +51,13 @@ export default function CheckoutPage() {
   }, [hotelId, roomId, user, token]);
 
   useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    next.set('checkIn', checkIn);
+    next.set('checkOut', checkOut);
+    navigate(`${window.location.pathname}?${next.toString()}`, { replace: true });
+  }, [checkIn, checkOut, searchParams, navigate]);
+
+  useEffect(() => {
     if (!user) return;
     const [firstName, ...lastNameParts] = user.fullName.split(' ');
     setFormData((current) => ({
@@ -71,9 +78,9 @@ export default function CheckoutPage() {
   const taxesAndFees = Math.round(totalRoomPrice * 0.15);
   
   const availableCoins = loyalty?.points ?? 0;
-  const maxRedeemableCoins = Math.min(availableCoins, Math.floor((totalRoomPrice + taxesAndFees) * 100));
+  const maxRedeemableCoins = Math.min(availableCoins, Math.floor((totalRoomPrice + taxesAndFees) * (100 / 50)));
   const redeemableCoins = Math.floor(maxRedeemableCoins / 100) * 100;
-  const discount = useCoins ? redeemableCoins / 100 : 0;
+  const discount = useCoins ? (redeemableCoins / 100) * 50 : 0;
   
   const grandTotal = totalRoomPrice + taxesAndFees - discount;
 
@@ -85,8 +92,44 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    if (!formData.firstName.trim()) { toast.error('First name is required'); return false; }
+    if (!formData.lastName.trim()) { toast.error('Last name is required'); return false; }
+    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) { toast.error('Please enter a valid email address'); return false; }
+    
+    // Card Validation
+    const cardNum = formData.cardNumber.replace(/\s/g, '');
+    if (!cardNum.match(/^\d{16}$/)) { toast.error('Card number must be 16 digits'); return false; }
+    
+    if (!formData.expiry.match(/^(0[1-9]|1[0-2])\/\d{2}$/)) { toast.error('Expiry date must be in MM/YY format'); return false; }
+    
+    const [month, year] = formData.expiry.split('/').map(Number);
+    const now = new Date();
+    const currentYear = now.getFullYear() % 100;
+    const currentMonth = now.getMonth() + 1;
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      toast.error('Card has expired');
+      return false;
+    }
+
+    if (!formData.cvc.match(/^\d{3,4}$/)) { toast.error('CVC must be 3 or 4 digits'); return false; }
+
+    // Date Validation
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (start < today) { toast.error('Check-in date cannot be in the past'); return false; }
+    if (end <= start) { toast.error('Check-out date must be after check-in date'); return false; }
+
+    return true;
+  };
+
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
 
     if (!token) {
       navigate('/login', { state: { redirectTo: window.location.pathname + window.location.search } });
@@ -254,7 +297,7 @@ export default function CheckoutPage() {
                    </div>
                    {useCoins && (
                      <p className="text-sm font-medium text-primary ml-1">
-                       Redeeming {redeemableCoins} coins for a ${discount} discount.
+                       Redeeming {redeemableCoins} coins for a ₱{discount.toLocaleString()} discount.
                      </p>
                    )}
                  </div>
@@ -263,7 +306,7 @@ export default function CheckoutPage() {
               {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
               <button type="submit" disabled={isSubmitting} className="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/30 hover:bg-primary-dark transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {isSubmitting ? 'Processing Payment...' : `Confirm & Pay $${grandTotal}`}
+                {isSubmitting ? 'Processing Payment...' : `Confirm & Pay ₱${grandTotal.toLocaleString()}`}
               </button>
             </motion.form>
           </div>
@@ -288,7 +331,16 @@ export default function CheckoutPage() {
                   <Calendar className="w-5 h-5 text-primary shrink-0" />
                   <div>
                     <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Dates</div>
-                    <div className="text-sm font-semibold">{checkIn} → {checkOut}</div>
+                    <div className="flex flex-col gap-1 mt-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase">IN</span>
+                        <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="bg-transparent text-xs font-bold text-gray-900 outline-none cursor-pointer hover:text-primary transition-colors" />
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase">OUT</span>
+                        <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="bg-transparent text-xs font-bold text-gray-900 outline-none cursor-pointer hover:text-primary transition-colors" />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex bg-gray-50 rounded-xl p-3 items-center gap-3">
@@ -302,16 +354,16 @@ export default function CheckoutPage() {
 
               <div className="border-t border-gray-100 pt-6 space-y-3 mb-6">
                 <h4 className="font-bold text-sm text-gray-900 mb-4">Price Summary</h4>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">${room.pricePerNight} x {nights} night{nights > 1 ? 's' : ''}</span><span className="font-semibold">${totalRoomPrice}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-gray-600">Taxes & Fees (15%)</span><span className="font-semibold">${taxesAndFees}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-600">₱{room.pricePerNight.toLocaleString()} x {nights} night{nights > 1 ? 's' : ''}</span><span className="font-semibold">₱{totalRoomPrice.toLocaleString()}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-600">Taxes & Fees (15%)</span><span className="font-semibold">₱{taxesAndFees.toLocaleString()}</span></div>
                 {useCoins && discount > 0 && (
                    <div className="flex justify-between text-sm text-green-600 font-bold">
                      <span>Trip Coins Discount</span>
-                     <span>-${discount}</span>
+                     <span>-₱{discount.toLocaleString()}</span>
                    </div>
                  )}
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Booking confirmation threshold</span><span className="font-semibold">Paid in full</span></div>
-                <div className="border-t border-dashed border-gray-200 pt-3 mt-3 flex justify-between items-center"><span className="font-bold text-gray-900">Total</span><span className="text-2xl font-black text-gray-900">${grandTotal}</span></div>
+                <div className="border-t border-dashed border-gray-200 pt-3 mt-3 flex justify-between items-center"><span className="font-bold text-gray-900">Total</span><span className="text-2xl font-black text-gray-900">₱{grandTotal.toLocaleString()}</span></div>
               </div>
 
               <div className="bg-green-50 rounded-xl p-4 flex items-start gap-3">

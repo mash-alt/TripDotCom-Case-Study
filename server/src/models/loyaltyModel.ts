@@ -16,26 +16,33 @@ export async function createLoyalty(customerId: number, connection: PoolConnecti
   );
 }
 
-export async function findLoyaltyByCustomerId(customerId: number) {
-  const rows = await query<LoyaltyRow[]>(
-    `SELECT
+export async function findLoyaltyByCustomerId(customerId: number, connection?: PoolConnection) {
+  const sql = `SELECT
       loyalty_id AS loyaltyId,
       customer_id AS customerId,
       points,
       membership_level AS membershipLevel
     FROM loyalty
-    WHERE customer_id = ?`,
-    [customerId],
-  );
+    WHERE customer_id = ?`;
+  
+  if (connection) {
+    const [rows] = await connection.execute<LoyaltyRow[]>(sql, [customerId]);
+    return rows[0] ?? null;
+  }
 
+  const rows = await query<LoyaltyRow[]>(sql, [customerId]);
   return rows[0] ?? null;
 }
 
-export async function updateLoyalty(customerId: number, points: number, membershipLevel: LoyaltyRow['membershipLevel']) {
-  await query<ResultSetHeader>(
-    `UPDATE loyalty
+export async function updateLoyalty(customerId: number, points: number, membershipLevel: LoyaltyRow['membershipLevel'], connection?: PoolConnection) {
+  const sql = `UPDATE loyalty
      SET points = ?, membership_level = ?
-     WHERE customer_id = ?`,
-    [points, membershipLevel, customerId],
-  );
+     WHERE customer_id = ?`;
+  const params = [points, membershipLevel, customerId];
+
+  if (connection) {
+    await connection.execute<ResultSetHeader>(sql, params);
+  } else {
+    await query<ResultSetHeader>(sql, params);
+  }
 }

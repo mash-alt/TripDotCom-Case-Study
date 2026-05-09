@@ -17,6 +17,9 @@ export interface BookingRow extends RowDataPacket {
   refundStatus: 'Requested' | 'Approved' | 'Rejected' | 'Processed' | null;
   coinsRedeemed: number;
   discountApplied: number;
+  customerName: string;
+  customerEmail: string;
+  internalNotes: string | null;
   createdAt: Date;
 }
 
@@ -38,10 +41,14 @@ export async function findBookingById(bookingId: number) {
       rf.refund_status AS refundStatus,
       b.coins_redeemed AS coinsRedeemed,
       b.discount_applied AS discountApplied,
+      c.full_name AS customerName,
+      c.email AS customerEmail,
+      b.internal_notes AS internalNotes,
       b.created_at AS createdAt
     FROM bookings b
     INNER JOIN rooms r ON r.room_id = b.room_id
     INNER JOIN hotels h ON h.hotel_id = r.hotel_id
+    INNER JOIN customers c ON c.customer_id = b.customer_id
     LEFT JOIN payments p ON p.booking_id = b.booking_id
     LEFT JOIN refunds rf ON rf.booking_id = b.booking_id
     WHERE b.booking_id = ?`,
@@ -69,10 +76,14 @@ export async function listBookingsForCustomer(customerId: number) {
       rf.refund_status AS refundStatus,
       b.coins_redeemed AS coinsRedeemed,
       b.discount_applied AS discountApplied,
+      c.full_name AS customerName,
+      c.email AS customerEmail,
+      b.internal_notes AS internalNotes,
       b.created_at AS createdAt
     FROM bookings b
     INNER JOIN rooms r ON r.room_id = b.room_id
     INNER JOIN hotels h ON h.hotel_id = r.hotel_id
+    INNER JOIN customers c ON c.customer_id = b.customer_id
     LEFT JOIN payments p ON p.booking_id = b.booking_id
     LEFT JOIN refunds rf ON rf.booking_id = b.booking_id
     WHERE b.customer_id = ?
@@ -99,10 +110,14 @@ export async function listAllBookings(adminId?: number) {
       rf.refund_status AS refundStatus,
       b.coins_redeemed AS coinsRedeemed,
       b.discount_applied AS discountApplied,
+      c.full_name AS customerName,
+      c.email AS customerEmail,
+      b.internal_notes AS internalNotes,
       b.created_at AS createdAt
     FROM bookings b
     INNER JOIN rooms r ON r.room_id = b.room_id
     INNER JOIN hotels h ON h.hotel_id = r.hotel_id
+    INNER JOIN customers c ON c.customer_id = b.customer_id
     LEFT JOIN payments p ON p.booking_id = b.booking_id
     LEFT JOIN refunds rf ON rf.booking_id = b.booking_id`;
 
@@ -181,6 +196,13 @@ export async function updateBookingStatus(
      SET booking_status = ?, cancelled_at = CASE WHEN ? = 'Cancelled' THEN NOW() ELSE cancelled_at END
      WHERE booking_id = ?`,
     [status, status, bookingId],
+  );
+}
+
+export async function updateInternalNotes(bookingId: number, notes: string) {
+  await query<ResultSetHeader>(
+    'UPDATE bookings SET internal_notes = ? WHERE booking_id = ?',
+    [notes, bookingId]
   );
 }
 

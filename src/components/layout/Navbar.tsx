@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { User, Menu, Globe, LogOut, ShieldCheck, LifeBuoy, Hotel } from 'lucide-react';
+import { User, Menu, Globe, LogOut, ShieldCheck, LifeBuoy, Hotel, Award } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -47,6 +47,9 @@ export default function Navbar() {
             <Link to="/admin" className={cn('nav-link', !isScrolled && isHome && 'text-white/90 hover:text-white')}>Admin</Link>
           )}
           <Link to="/support" className={cn('nav-link', !isScrolled && isHome && 'text-white/90 hover:text-white')}>Support</Link>
+          {(!isAuthenticated || user?.role === 'customer') && (
+            <Link to="/loyalty" className={cn('nav-link font-bold text-primary', !isScrolled && isHome && 'text-white/90 hover:text-white')}>Rewards</Link>
+          )}
 
           <div className="h-6 w-px bg-gray-200 mx-2 hidden lg:block"></div>
 
@@ -101,6 +104,12 @@ export default function Navbar() {
                         <LifeBuoy className="w-4 h-4" />
                         Support
                       </Link>
+                      {user.role === 'customer' && (
+                        <Link to="/loyalty" onClick={() => setShowDropdown(false)} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">
+                          <Award className="w-4 h-4" />
+                          Rewards
+                        </Link>
+                      )}
                       <div className="h-px bg-gray-100 my-2"></div>
                       <button
                         onClick={() => {

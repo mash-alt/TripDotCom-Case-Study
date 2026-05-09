@@ -57,7 +57,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onBook }) => {
           <div className="text-right md:text-left">
             <span className="text-xs text-gray-400 block font-bold uppercase">Member Price</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-gray-900">${room.pricePerNight}</span>
+              <span className="text-3xl font-black text-gray-900">₱{room.pricePerNight.toLocaleString()}</span>
               <span className="text-sm text-gray-400 font-bold">/ night</span>
             </div>
             <p className="text-[10px] text-green-500 font-black mt-1 uppercase tracking-widest">Free Cancellation</p>

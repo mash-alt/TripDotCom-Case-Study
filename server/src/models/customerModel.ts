@@ -7,6 +7,8 @@ export interface CustomerRow extends RowDataPacket {
   email: string;
   phoneNumber: string | null;
   passwordHash: string;
+  loyaltyPoints: number;
+  membershipLevel: string;
   createdAt: Date;
 }
 
@@ -63,14 +65,17 @@ export async function findCustomerById(customerId: number) {
 export async function listCustomers() {
   return query<CustomerRow[]>(
     `SELECT
-      customer_id AS customerId,
-      full_name AS fullName,
-      email,
-      phone_number AS phoneNumber,
-      password_hash AS passwordHash,
-      created_at AS createdAt
-    FROM customers
-    ORDER BY created_at DESC`,
+      c.customer_id AS customerId,
+      c.full_name AS fullName,
+      c.email,
+      c.phone_number AS phoneNumber,
+      c.password_hash AS passwordHash,
+      l.points AS loyaltyPoints,
+      l.membership_level AS membershipLevel,
+      c.created_at AS createdAt
+    FROM customers c
+    LEFT JOIN loyalty l ON l.customer_id = c.customer_id
+    ORDER BY c.created_at DESC`,
   );
 }
 

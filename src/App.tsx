@@ -15,6 +15,7 @@ import BookingHistoryPage from '@/pages/account/BookingHistoryPage';
 import SupportPage from '@/pages/SupportPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import PopularHotelsPage from '@/pages/PopularHotelsPage';
+import LoyaltyPage from '@/pages/LoyaltyPage';
 import ProtectedRoute from '@/components/app/ProtectedRoute';
 import { Toaster } from 'sonner';
 
@@ -28,12 +29,21 @@ function ScrollToTop() {
   return null;
 }
 
+
 function AppContent() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/popular" element={<PopularHotelsPage />} />
       <Route path="/search" element={<SearchResultsPage />} />
+      <Route
+        path="/loyalty"
+        element={(
+          <ProtectedRoute roles={['customer']}>
+            <LoyaltyPage />
+          </ProtectedRoute>
+        )}
+      />
       <Route path="/hotel/:id" element={<HotelDetailsPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />

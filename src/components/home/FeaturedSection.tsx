@@ -4,12 +4,14 @@ import HotelCard from '@/components/search/HotelCard';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { HotelSummary } from '@/types/api';
+import { useAuth } from '@/hooks/useAuth';
 
 interface FeaturedSectionProps {
   hotels: HotelSummary[];
 }
 
 export default function FeaturedSection({ hotels }: FeaturedSectionProps) {
+  const { user } = useAuth();
   const destinations = hotels.reduce<Record<string, { name: string; count: number; image: string | null }>>((acc, hotel) => {
     const existing = acc[hotel.city];
     acc[hotel.city] = {
@@ -86,8 +88,18 @@ export default function FeaturedSection({ hotels }: FeaturedSectionProps) {
             <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight">Unlock Secret Deals of Up to 40% Off</h2>
             <p className="text-lg md:text-xl text-blue-100 mb-8 font-medium">Join our TripStay Rewards program and start saving on your next journey. Exclusive member rates across our global hotel network.</p>
             <div className="flex flex-wrap gap-4">
-              <button className="bg-white text-primary font-bold px-8 py-4 rounded-2xl hover:bg-blue-50 transition-colors shadow-lg shadow-black/10">Join Rewards Now</button>
-              <button className="bg-primary-dark/30 backdrop-blur-md border border-white/20 text-white font-bold px-8 py-4 rounded-2xl hover:bg-primary-dark/50 transition-colors">Learn More</button>
+              <Link 
+                to={user ? "/loyalty" : "/register"} 
+                className="bg-white text-primary font-bold px-8 py-4 rounded-2xl hover:bg-blue-50 transition-colors shadow-lg shadow-black/10 inline-block"
+              >
+                Join Rewards Now
+              </Link>
+              <Link 
+                to="/loyalty" 
+                className="bg-primary-dark/30 backdrop-blur-md border border-white/20 text-white font-bold px-8 py-4 rounded-2xl hover:bg-primary-dark/50 transition-colors inline-block"
+              >
+                Learn More
+              </Link>
             </div>
           </div>
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl" />

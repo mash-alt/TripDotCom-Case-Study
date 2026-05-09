@@ -77,8 +77,16 @@ export const bookingApi = {
       { method: 'PATCH', body: JSON.stringify({ reason }) },
       token,
     ),
+  checkIn: (bookingId: number, token: string) =>
+    apiRequest<Booking>(`/api/bookings/${bookingId}/check-in`, { method: 'PATCH' }, token),
   complete: (bookingId: number, token: string) =>
     apiRequest<Booking>(`/api/bookings/${bookingId}/complete`, { method: 'PATCH' }, token),
+  updateNotes: (bookingId: number, notes: string, token: string) =>
+    apiRequest<Booking>(
+      `/api/bookings/${bookingId}/notes`,
+      { method: 'PATCH', body: JSON.stringify({ notes }) },
+      token,
+    ),
 };
 
 export const paymentApi = {
@@ -106,4 +114,8 @@ export const supportApi = {
 
 export const loyaltyApi = {
   get: (customerId: number, token: string) => apiRequest<LoyaltySummary>(`/api/loyalty/${customerId}`, {}, token),
+};
+
+export const customerApi = {
+  list: (token: string) => apiRequest<any[]>('/api/customers', {}, token),
 };

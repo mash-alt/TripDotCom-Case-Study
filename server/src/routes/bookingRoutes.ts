@@ -21,11 +21,18 @@ router.post(
 );
 router.get('/bookings', requireRole(['admin']), asyncHandler(bookingController.listAllBookings));
 router.get('/bookings/:customerId', asyncHandler(bookingController.listCustomerBookings));
+router.patch('/bookings/:id/check-in', requireRole(['admin']), asyncHandler(bookingController.checkInBooking));
 router.patch('/bookings/:id/complete', requireRole(['admin']), asyncHandler(bookingController.completeBooking));
 router.patch(
   '/bookings/:id/cancel',
   [body('reason').optional().isString(), validateRequest],
   asyncHandler(bookingController.cancelBooking),
+);
+router.patch(
+  '/bookings/:id/notes',
+  requireRole(['admin']),
+  [body('notes').isString(), validateRequest],
+  asyncHandler(bookingController.updateInternalNotes),
 );
 router.delete('/bookings/:id', requireRole(['admin']), asyncHandler(bookingController.deleteBooking));
 

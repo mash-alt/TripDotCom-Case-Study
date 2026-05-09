@@ -25,6 +25,7 @@ async function formatCustomerSession(customer: customerModel.CustomerRow) {
       phoneNumber: customer.phoneNumber,
       loyaltyPoints: loyalty?.points ?? 0,
       membershipLevel: loyalty?.membershipLevel ?? 'Bronze',
+      createdAt: customer.createdAt,
     },
   };
 }
@@ -42,6 +43,7 @@ async function formatAdminSession(admin: adminModel.AdminRow) {
       role: 'admin' as const,
       fullName: admin.fullName,
       email: admin.email,
+      createdAt: admin.createdAt,
     },
   };
 }

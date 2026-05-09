@@ -90,10 +90,11 @@ CREATE TABLE IF NOT EXISTS bookings (
   check_out_date DATE NOT NULL,
   nights INT NOT NULL,
   total_price DECIMAL(10, 2) NOT NULL,
-  booking_status ENUM('PendingPayment', 'Confirmed', 'Cancelled', 'Completed') NOT NULL DEFAULT 'PendingPayment',
+  booking_status ENUM('PendingPayment', 'Confirmed', 'CheckedIn', 'Cancelled', 'Completed') NOT NULL DEFAULT 'PendingPayment',
   coins_redeemed INT NOT NULL DEFAULT 0,
   discount_applied DECIMAL(10, 2) NOT NULL DEFAULT 0,
   cancelled_at TIMESTAMP NULL,
+  internal_notes TEXT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_booking_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
   CONSTRAINT fk_booking_room FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE RESTRICT

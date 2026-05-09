@@ -6,6 +6,7 @@ export interface AdminRow extends RowDataPacket {
   fullName: string;
   email: string;
   passwordHash: string;
+  createdAt: Date;
 }
 
 export async function findAdminByEmail(email: string, connection?: PoolConnection) {
@@ -15,7 +16,8 @@ export async function findAdminByEmail(email: string, connection?: PoolConnectio
         admin_id AS adminId,
         full_name AS fullName,
         email,
-        password_hash AS passwordHash
+        password_hash AS passwordHash,
+        created_at AS createdAt
       FROM admins
       WHERE email = ?`,
       [email],
@@ -28,7 +30,8 @@ export async function findAdminByEmail(email: string, connection?: PoolConnectio
       admin_id AS adminId,
       full_name AS fullName,
       email,
-      password_hash AS passwordHash
+      password_hash AS passwordHash,
+      created_at AS createdAt
     FROM admins
     WHERE email = ?`,
     [email],
@@ -43,7 +46,8 @@ export async function findAdminById(adminId: number) {
       admin_id AS adminId,
       full_name AS fullName,
       email,
-      password_hash AS passwordHash
+      password_hash AS passwordHash,
+      created_at AS createdAt
     FROM admins
     WHERE admin_id = ?`,
     [adminId],

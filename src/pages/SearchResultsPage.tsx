@@ -12,7 +12,7 @@ import StatusMessage from '@/components/shared/StatusMessage';
 export default function SearchResultsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isGridView, setIsGridView] = useState(false);
-  const [maxPrice, setMaxPrice] = useState(Number(searchParams.get('maxPrice') ?? 1000));
+  const [maxPrice, setMaxPrice] = useState(Number(searchParams.get('maxPrice') ?? 50000));
   const [stars, setStars] = useState(Number(searchParams.get('stars') ?? 0));
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,7 +31,7 @@ export default function SearchResultsPage() {
     void hotelApi
       .list({
         search: query,
-        maxPrice: maxPrice < 1000 ? maxPrice : undefined,
+        maxPrice: maxPrice < 50000 ? maxPrice : undefined,
         stars: stars || undefined,
       })
       .then(setHotels)
@@ -79,7 +79,7 @@ export default function SearchResultsPage() {
             onMaxPriceChange={setMaxPrice}
             onStarsChange={setStars}
             onClear={() => {
-              setMaxPrice(1000);
+              setMaxPrice(50000);
               setStars(0);
             }}
           />

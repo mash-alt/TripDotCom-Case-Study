@@ -179,7 +179,7 @@ export default function HotelDetailsPage() {
                 <div className="mb-8">
                   <span className="text-xs text-gray-400 font-black uppercase tracking-widest block mb-1">Starting from</span>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-gray-900">${selectedRoom?.pricePerNight ?? hotel.basePrice}</span>
+                    <span className="text-4xl font-black text-gray-900">₱{(selectedRoom?.pricePerNight ?? hotel.basePrice).toLocaleString()}</span>
                     <span className="text-gray-400 font-bold">/ night</span>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export default function HotelDetailsPage() {
                   <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between">
                     <div>
                       <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none mb-1">Estimated stay total</span>
-                      <span className="text-sm font-bold text-gray-900">${estimatedTotal} for {Math.max(nights, 1)} night{Math.max(nights, 1) > 1 ? 's' : ''}</span>
+                      <span className="text-sm font-bold text-gray-900">₱{estimatedTotal.toLocaleString()} for {Math.max(nights, 1)} night{Math.max(nights, 1) > 1 ? 's' : ''}</span>
                     </div>
                     <ShieldCheck className="w-5 h-5 text-green-500" />
                   </div>

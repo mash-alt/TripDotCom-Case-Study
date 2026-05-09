@@ -64,7 +64,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, horizontal = false }) => {
         <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
           <div>
             <span className="text-xs text-gray-400 block">From per night</span>
-            <span className="text-2xl font-black text-gray-900">${hotel.basePrice}</span>
+            <span className="text-2xl font-black text-gray-900">₱{hotel.basePrice.toLocaleString()}</span>
           </div>
           <Link to={`/hotel/${hotel.id}`}>
             <button className="bg-gray-900 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-primary transition-colors">

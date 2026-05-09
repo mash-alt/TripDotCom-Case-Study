@@ -89,7 +89,7 @@ export default function BookingHistoryPage() {
                         <p className="text-gray-600 font-medium mb-4">{booking.roomName}</p>
                         <div className="grid sm:grid-cols-3 gap-4 text-sm">
                           <div className="flex items-center gap-2 text-gray-600"><CalendarDays className="w-4 h-4 text-primary" />{booking.checkInDate} → {booking.checkOutDate}</div>
-                          <div className="flex items-center gap-2 text-gray-600"><BadgeDollarSign className="w-4 h-4 text-primary" />${booking.totalPrice}</div>
+                          <div className="flex items-center gap-2 text-gray-600"><BadgeDollarSign className="w-4 h-4 text-primary" />₱{booking.totalPrice.toLocaleString()}</div>
                           <div className="flex items-center gap-2 text-gray-600"><ShieldCheck className="w-4 h-4 text-primary" />{booking.nights} night{booking.nights > 1 ? 's' : ''}</div>
                         </div>
                       </div>
