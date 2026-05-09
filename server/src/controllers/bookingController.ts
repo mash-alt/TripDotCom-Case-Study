@@ -16,8 +16,9 @@ export async function listCustomerBookings(request: Request, response: Response)
   response.json(await bookingService.listBookings(customerId));
 }
 
-export async function listAllBookings(_request: Request, response: Response) {
-  response.json(await bookingService.listBookings());
+export async function listAllBookings(request: Request, response: Response) {
+  const adminId = request.user!.id === 1 ? undefined : request.user!.id;
+  response.json(await bookingService.listBookings(undefined, adminId));
 }
 
 export async function completeBooking(request: Request, response: Response) {

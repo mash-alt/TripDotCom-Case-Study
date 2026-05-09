@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 );
 
 INSERT INTO admins (full_name, email, password_hash)
-SELECT 'System Admin', 'admin@tripstay.com', '$2b$10$OCYPHmBLIzm.G12efTbHuuqDTEZ1aXhpEJTgl9hZF4i09aBFmg5Ka'
+SELECT 'System Admin', 'admin@tripstay.com', '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'
 WHERE NOT EXISTS (
   SELECT 1 FROM admins WHERE email = 'admin@tripstay.com'
 );

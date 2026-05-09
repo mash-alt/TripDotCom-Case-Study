@@ -14,27 +14,42 @@ export interface SupportRow extends RowDataPacket {
   updatedAt: Date;
 }
 
-export async function listSupportTickets(filters: { customerId?: number }) {
+export async function listSupportTickets(filters: { customerId?: number; adminId?: number }) {
   const params: unknown[] = [];
   let sql = `SELECT
-      support_id AS supportId,
-      customer_id AS customerId,
-      booking_id AS bookingId,
-      admin_id AS adminId,
-      subject,
-      message,
-      ticket_status AS status,
-      resolution_notes AS resolutionNotes,
-      created_at AS createdAt,
-      updated_at AS updatedAt
-    FROM support_tickets`;
+      st.support_id AS supportId,
+      st.customer_id AS customerId,
+      st.booking_id AS bookingId,
+      st.admin_id AS adminId,
+      st.subject,
+      st.message,
+      st.ticket_status AS status,
+      st.resolution_notes AS resolutionNotes,
+      st.created_at AS createdAt,
+      st.updated_at AS updatedAt
+    FROM support_tickets st
+    LEFT JOIN bookings b ON b.booking_id = st.booking_id
+    LEFT JOIN rooms r ON r.room_id = b.room_id
+    LEFT JOIN hotels h ON h.hotel_id = r.hotel_id`;
+
+  const conditions: string[] = [];
 
   if (filters.customerId) {
-    sql += ' WHERE customer_id = ?';
+    conditions.push('st.customer_id = ?');
     params.push(filters.customerId);
   }
 
-  sql += ' ORDER BY updated_at DESC';
+  if (filters.adminId && filters.adminId !== 1) {
+    // Only show tickets related to hotels managed by this admin
+    conditions.push('h.admin_id = ?');
+    params.push(filters.adminId);
+  }
+
+  if (conditions.length > 0) {
+    sql += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  sql += ' ORDER BY st.updated_at DESC';
 
   return query<SupportRow[]>(sql, params);
 }

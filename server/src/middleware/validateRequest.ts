@@ -6,7 +6,9 @@ export function validateRequest(request: Request, _response: Response, next: Nex
   const result = validationResult(request);
 
   if (!result.isEmpty()) {
-    next(new ApiError(400, 'Validation failed.', result.array()));
+    const errors = result.array();
+    console.log(`[VALIDATION ERROR] ${request.method} ${request.url}:`, JSON.stringify(errors, null, 2));
+    next(new ApiError(400, 'Validation failed.', errors));
     return;
   }
 

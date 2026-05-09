@@ -1,8 +1,8 @@
 import * as supportModel from '../models/supportModel.js';
 import { ApiError } from '../utils/apiError.js';
 
-export async function listSupportTickets(customerId?: number) {
-  return supportModel.listSupportTickets({ customerId });
+export async function listSupportTickets(customerId?: number, adminId?: number) {
+  return supportModel.listSupportTickets({ customerId, adminId });
 }
 
 export async function createSupportTicket(input: {

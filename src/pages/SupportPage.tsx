@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import StatusMessage from '@/components/shared/StatusMessage';
+import TicketCard from '@/components/support/TicketCard';
 import { bookingApi, supportApi } from '@/api/services';
 import { useAuth } from '@/hooks/useAuth';
 import type { Booking, SupportTicket } from '@/types/api';
@@ -14,7 +15,6 @@ export default function SupportPage() {
     bookingId: '',
     subject: '',
     message: '',
-    resolutionNotes: '',
   });
 
   useEffect(() => {
@@ -45,19 +45,18 @@ export default function SupportPage() {
         token,
       );
       setTickets((current) => [ticket, ...current]);
-      setFormData({ bookingId: '', subject: '', message: '', resolutionNotes: '' });
+      setFormData({ bookingId: '', subject: '', message: '' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to create support ticket.');
     }
   };
 
-  const handleResolve = async (ticket: SupportTicket, status: 'InProgress' | 'Resolved') => {
+  const handleResolve = async (ticket: SupportTicket, status: 'InProgress' | 'Resolved', resolutionNotes: string) => {
     if (!token) return;
 
     try {
-      const updated = await supportApi.resolve(ticket.supportId, { status, resolutionNotes: formData.resolutionNotes }, token);
+      const updated = await supportApi.resolve(ticket.supportId, { status, resolutionNotes }, token);
       setTickets((current) => current.map((item) => (item.supportId === updated.supportId ? updated : item)));
-      setFormData((current) => ({ ...current, resolutionNotes: '' }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to update ticket.');
     }
@@ -103,29 +102,12 @@ export default function SupportPage() {
             ) : (
               <div className="space-y-4">
                 {tickets.map((ticket) => (
-                  <div key={ticket.supportId} className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap gap-3 items-center mb-3">
-                          <h3 className="text-xl font-bold text-gray-900">{ticket.subject}</h3>
-                          <span className="px-3 py-1 rounded-full bg-blue-50 text-primary text-xs font-bold uppercase tracking-wider">{ticket.status}</span>
-                          {ticket.bookingId && <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider">Booking #{ticket.bookingId}</span>}
-                        </div>
-                        <p className="text-gray-600 font-medium mb-3">{ticket.message}</p>
-                        {ticket.resolutionNotes && <p className="text-sm text-green-700 bg-green-50 rounded-2xl p-4 font-medium">Resolution: {ticket.resolutionNotes}</p>}
-                      </div>
-
-                      {user?.role === 'admin' && (
-                        <div className="w-full md:w-72 space-y-3">
-                          <textarea value={formData.resolutionNotes} onChange={(e) => setFormData((current) => ({ ...current, resolutionNotes: e.target.value }))} placeholder="Add resolution notes" rows={4} className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium resize-none" />
-                          <div className="grid grid-cols-2 gap-3">
-                            <button onClick={() => handleResolve(ticket, 'InProgress')} className="rounded-2xl py-3 bg-gray-900 text-white font-bold">In Progress</button>
-                            <button onClick={() => handleResolve(ticket, 'Resolved')} className="rounded-2xl py-3 bg-primary text-white font-bold">Resolve</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <TicketCard
+                    key={ticket.supportId}
+                    ticket={ticket}
+                    isAdmin={user?.role === 'admin'}
+                    onResolve={handleResolve}
+                  />
                 ))}
               </div>
             )}

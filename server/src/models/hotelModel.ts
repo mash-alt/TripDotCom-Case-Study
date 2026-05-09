@@ -28,7 +28,7 @@ export interface AmenityRow extends RowDataPacket {
   amenityName: string;
 }
 
-export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number }) {
+export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number; adminId?: number }) {
   const conditions = ['1 = 1'];
   const params: Record<string, unknown> = {};
 
@@ -50,6 +50,11 @@ export async function listHotels(filters: { search?: string; city?: string; maxP
   if (filters.maxPrice) {
     conditions.push('r.price_per_night <= :maxPrice');
     params.maxPrice = filters.maxPrice;
+  }
+
+  if (filters.adminId) {
+    conditions.push('h.admin_id = :adminId');
+    params.adminId = filters.adminId;
   }
 
   return query<HotelListRow[]>(

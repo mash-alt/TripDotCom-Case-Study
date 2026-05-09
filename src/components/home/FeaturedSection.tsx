@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import HotelCard from '@/components/search/HotelCard';
 import { ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { HotelSummary } from '@/types/api';
 
 interface FeaturedSectionProps {
@@ -28,9 +29,9 @@ export default function FeaturedSection({ hotels }: FeaturedSectionProps) {
               <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">Popular Stays Worldwide</h2>
               <p className="text-gray-500 font-medium max-w-xl">Curated collection of the most sought-after hotels based on traveler reviews and demand.</p>
             </div>
-            <button className="flex items-center gap-1 text-primary font-bold hover:underline">
+            <Link to="/popular" className="flex items-center gap-1 text-primary font-bold hover:underline">
               View all popular hotels <ChevronRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

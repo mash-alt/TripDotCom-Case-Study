@@ -75,9 +75,9 @@ export async function listBookingsForCustomer(customerId: number) {
   );
 }
 
-export async function listAllBookings() {
-  return query<BookingRow[]>(
-    `SELECT
+export async function listAllBookings(adminId?: number) {
+  const params: unknown[] = [];
+  let sql = `SELECT
       b.booking_id AS bookingId,
       b.customer_id AS customerId,
       b.room_id AS roomId,
@@ -96,9 +96,16 @@ export async function listAllBookings() {
     INNER JOIN rooms r ON r.room_id = b.room_id
     INNER JOIN hotels h ON h.hotel_id = r.hotel_id
     LEFT JOIN payments p ON p.booking_id = b.booking_id
-    LEFT JOIN refunds rf ON rf.booking_id = b.booking_id
-    ORDER BY b.created_at DESC`,
-  );
+    LEFT JOIN refunds rf ON rf.booking_id = b.booking_id`;
+
+  if (adminId) {
+    sql += ' WHERE h.admin_id = ?';
+    params.push(adminId);
+  }
+
+  sql += ' ORDER BY b.created_at DESC';
+
+  return query<BookingRow[]>(sql, params);
 }
 
 export async function findOverlappingBooking(roomId: number, checkInDate: string, checkOutDate: string) {

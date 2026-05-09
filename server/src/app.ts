@@ -12,6 +12,13 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use((req, _res, next) => {
+  const auth = req.headers.authorization ? '(Has Token)' : '(No Token)';
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} ${auth}`);
+  next();
+});
+
 app.use(express.json());
 
 app.get('/health', (_request, response) => {

@@ -3,7 +3,8 @@ import * as supportService from '../services/supportService.js';
 
 export async function listSupportTickets(request: Request, response: Response) {
   const customerId = request.user!.role === 'customer' ? request.user!.id : undefined;
-  response.json(await supportService.listSupportTickets(customerId));
+  const adminId = request.user!.role === 'admin' && request.user!.id !== 1 ? request.user!.id : undefined;
+  response.json(await supportService.listSupportTickets(customerId, adminId));
 }
 
 export async function createSupportTicket(request: Request, response: Response) {

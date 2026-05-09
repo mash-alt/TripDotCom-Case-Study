@@ -55,8 +55,8 @@ export async function getBooking(bookingId: number) {
   return booking;
 }
 
-export async function listBookings(customerId?: number) {
-  return customerId ? bookingModel.listBookingsForCustomer(customerId) : bookingModel.listAllBookings();
+export async function listBookings(customerId?: number, adminId?: number) {
+  return customerId ? bookingModel.listBookingsForCustomer(customerId) : bookingModel.listAllBookings(adminId);
 }
 
 export async function confirmBookingPayment(input: {

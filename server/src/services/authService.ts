@@ -90,14 +90,28 @@ export async function login(input: { email: string; password: string; role?: Use
   const targetRole = input.role ?? (admin ? 'admin' : 'customer');
 
   if (targetRole === 'admin') {
-    if (!admin || !(await bcrypt.compare(input.password, admin.passwordHash))) {
+    console.log(`[AUTH] Admin login attempt for: ${input.email}`);
+    if (!admin) {
+      console.log(`[AUTH] Admin not found: ${input.email}`);
+      throw new ApiError(401, 'Invalid email or password.');
+    }
+    const isMatch = await bcrypt.compare(input.password, admin.passwordHash);
+    console.log(`[AUTH] Admin password match: ${isMatch}`);
+    if (!isMatch) {
       throw new ApiError(401, 'Invalid email or password.');
     }
 
     return formatAdminSession(admin);
   }
 
-  if (!customer || !(await bcrypt.compare(input.password, customer.passwordHash))) {
+  console.log(`[AUTH] Customer login attempt for: ${input.email}`);
+  if (!customer) {
+    console.log(`[AUTH] Customer not found: ${input.email}`);
+    throw new ApiError(401, 'Invalid email or password.');
+  }
+  const isMatch = await bcrypt.compare(input.password, customer.passwordHash);
+  console.log(`[AUTH] Customer password match: ${isMatch}`);
+  if (!isMatch) {
     throw new ApiError(401, 'Invalid email or password.');
   }
 

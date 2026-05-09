@@ -11,10 +11,10 @@ import loyaltyRoutes from './loyaltyRoutes.js';
 
 const router = Router();
 
-router.use(authRoutes);
-router.use(customerRoutes);
 router.use(hotelRoutes);
 router.use(roomRoutes);
+router.use(authRoutes);
+router.use(customerRoutes);
 router.use(bookingRoutes);
 router.use(paymentRoutes);
 router.use(refundRoutes);

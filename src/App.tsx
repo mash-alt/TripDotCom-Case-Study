@@ -14,6 +14,7 @@ import RegisterPage from '@/pages/RegisterPage';
 import BookingHistoryPage from '@/pages/account/BookingHistoryPage';
 import SupportPage from '@/pages/SupportPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import PopularHotelsPage from '@/pages/PopularHotelsPage';
 import ProtectedRoute from '@/components/app/ProtectedRoute';
 
 function ScrollToTop() {
@@ -30,6 +31,7 @@ function AppContent() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/popular" element={<PopularHotelsPage />} />
       <Route path="/search" element={<SearchResultsPage />} />
       <Route path="/hotel/:id" element={<HotelDetailsPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />

@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
+
 export const env = {
   port: Number(process.env.API_PORT ?? 4000),
   clientUrl: process.env.CLIENT_URL ?? 'http://localhost:3000',

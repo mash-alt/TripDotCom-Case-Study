@@ -8,6 +8,7 @@ export async function listHotels(request: Request, response: Response) {
       city: request.query.city?.toString(),
       maxPrice: request.query.maxPrice ? Number(request.query.maxPrice) : undefined,
       stars: request.query.stars ? Number(request.query.stars) : undefined,
+      adminId: request.query.adminId ? Number(request.query.adminId) : undefined,
     }),
   );
 }
@@ -26,10 +27,10 @@ export async function createHotel(request: Request, response: Response) {
 }
 
 export async function updateHotel(request: Request, response: Response) {
-  response.json(await hotelService.updateHotel(Number(request.params.id), request.body));
+  response.json(await hotelService.updateHotel(Number(request.params.id), request.body, request.user!.id));
 }
 
 export async function deleteHotel(request: Request, response: Response) {
-  await hotelService.deleteHotel(Number(request.params.id));
+  await hotelService.deleteHotel(Number(request.params.id), request.user!.id);
   response.status(204).send();
 }

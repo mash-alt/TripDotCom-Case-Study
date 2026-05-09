@@ -36,7 +36,7 @@ const emptyRoomForm = {
 };
 
 export default function AdminDashboardPage() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [hotels, setHotels] = useState<HotelSummary[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
@@ -49,7 +49,11 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (!token) return;
 
-    void Promise.all([hotelApi.list(), bookingApi.listAll(token), supportApi.list(token)])
+    void Promise.all([
+      hotelApi.list({ adminId: user?.id === 1 ? undefined : user?.id }),
+      bookingApi.listAll(token),
+      supportApi.list(token),
+    ])
       .then(([hotelData, bookingData, ticketData]) => {
         setHotels(hotelData);
         setBookings(bookingData);
@@ -57,7 +61,7 @@ export default function AdminDashboardPage() {
         setSelectedHotelId(hotelData[0]?.id ?? 0);
       })
       .catch((err: Error) => setError(err.message));
-  }, [token]);
+  }, [token, user]);
 
   useEffect(() => {
     if (!selectedHotelId) return;
@@ -74,7 +78,7 @@ export default function AdminDashboardPage() {
   const selectedHotel = useMemo(() => hotels.find((hotel) => hotel.id === selectedHotelId) ?? null, [hotels, selectedHotelId]);
 
   const refreshHotels = async () => {
-    const data = await hotelApi.list();
+    const data = await hotelApi.list({ adminId: user?.id === 1 ? undefined : user?.id });
     setHotels(data);
   };
 

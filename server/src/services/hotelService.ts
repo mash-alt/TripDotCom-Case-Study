@@ -23,7 +23,7 @@ async function enrichHotelSummary(row: hotelModel.HotelListRow) {
   };
 }
 
-export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number }) {
+export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number; adminId?: number }) {
   const hotels = await hotelModel.listHotels(filters);
   return Promise.all(hotels.map((hotel) => enrichHotelSummary(hotel)));
 }
@@ -130,11 +130,16 @@ export async function updateHotel(
     images: string[];
     amenities: string[];
   },
+  adminId: number,
 ) {
   const existingHotel = await hotelModel.getHotelById(hotelId);
 
   if (!existingHotel) {
     throw new ApiError(404, 'Hotel not found.');
+  }
+
+  if (existingHotel.adminId !== adminId && adminId !== 1) {
+    throw new ApiError(403, 'You do not have permission to modify this hotel.');
   }
 
   await withTransaction(async (connection) => {
@@ -155,6 +160,16 @@ export async function updateHotel(
   return getHotel(hotelId);
 }
 
-export async function deleteHotel(hotelId: number) {
+export async function deleteHotel(hotelId: number, adminId: number) {
+  const existingHotel = await hotelModel.getHotelById(hotelId);
+
+  if (!existingHotel) {
+    throw new ApiError(404, 'Hotel not found.');
+  }
+
+  if (existingHotel.adminId !== adminId && adminId !== 1) {
+    throw new ApiError(403, 'You do not have permission to delete this hotel.');
+  }
+
   await hotelModel.deleteHotel(hotelId);
 }
