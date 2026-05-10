@@ -34,7 +34,7 @@ export default function Navbar() {
             <Globe className="text-white w-6 h-6" />
           </div>
           <span className={cn('text-2xl font-bold tracking-tight', isScrolled || !isHome ? 'text-gray-900' : 'text-white')}>
-            Trip<span className="text-primary font-extrabold italic">Stay</span>
+            Trip<span className="text-primary font-extrabold italic">.com</span>
           </span>
         </Link>
 

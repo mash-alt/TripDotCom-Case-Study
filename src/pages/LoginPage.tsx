@@ -43,7 +43,7 @@ export default function LoginPage() {
             <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
               <Globe className="text-white w-7 h-7" />
             </div>
-            <span className="text-3xl font-bold tracking-tight text-white">Trip<span className="text-primary font-extrabold italic">Stay</span></span>
+            <span className="text-3xl font-bold tracking-tight text-white">Trip<span className="text-primary font-extrabold italic">com</span></span>
           </Link>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.8 }}>
             <h1 className="text-5xl font-black text-white mb-6 leading-tight">Unlock exclusive <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">member rates.</span></h1>

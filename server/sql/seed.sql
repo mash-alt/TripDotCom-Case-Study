@@ -4,7 +4,7 @@
 -- All passwords are hashed from: "Password123!"
 -- ============================================================
 
-USE tripstay;
+USE tripdotcom;
 
 -- ============================================================
 -- ADMINS (Hotel Owners)

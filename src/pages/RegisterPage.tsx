@@ -41,7 +41,7 @@ export default function RegisterPage() {
             <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
               <Globe className="text-white w-7 h-7" />
             </div>
-            <span className="text-3xl font-bold tracking-tight text-white">Trip<span className="text-primary font-extrabold italic">Stay</span></span>
+            <span className="text-3xl font-bold tracking-tight text-white">Trip<span className="text-primary font-extrabold italic">.com</span></span>
           </Link>
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.8 }}>
@@ -60,7 +60,7 @@ export default function RegisterPage() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md my-auto pt-16 lg:pt-0">
           <div className="text-center lg:text-left mb-10">
             <h2 className="text-3xl font-black text-gray-900 mb-2">Create an Account</h2>
-            <p className="text-gray-500 font-medium">Join TripStay to book hotels with real backend data.</p>
+            <p className="text-gray-500 font-medium">Join Trip.com to book hotels with real backend data.</p>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-5">
