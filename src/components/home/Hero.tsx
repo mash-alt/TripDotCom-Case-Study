@@ -27,7 +27,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-lg md:text-xl text-white/90 font-medium mb-10 max-w-2xl mx-auto"
         >
-          Book unique hotels, boutique stays, and luxury resorts at the best prices with TriStay.
+          Book unique hotels, boutique stays, and luxury resorts at the best prices with Trip.com.
         </motion.p>
       </div>
     </div>

@@ -14,10 +14,10 @@ export default function Footer() {
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
                 <Globe className="text-white w-6 h-6" />
               </div>
-              <span className="text-2xl font-bold tracking-tight text-white">Trip<span className="text-primary font-extrabold italic">Stay</span></span>
+              <span className="text-2xl font-bold tracking-tight text-white">Trip<span className="text-primary font-extrabold italic">.com</span></span>
             </Link>
             <p className="text-gray-400 leading-relaxed font-medium">
-              Discover your next adventure with TripStay. We provide seamless hotel bookings and exceptional travel experiences worldwide since 2024.
+              Discover your next adventure with Trip.com. We provide seamless hotel bookings and exceptional travel experiences worldwide since 2024.
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-all"><Facebook className="w-5 h-5" /></a>
@@ -63,7 +63,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <span>support@tripstay.com</span>
+                <span>support@trip.com</span>
               </li>
             </ul>
           </div>
@@ -71,7 +71,7 @@ export default function Footer() {
 
         <div className="pt-10 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-sm font-bold text-gray-500">
-            © {currentYear} TripStay. All rights reserved. Built with Vite, React & MySQL.
+            © {currentYear} Trip.com. All rights reserved. Built with Vite, React & MySQL.
           </p>
           <div className="flex items-center gap-8">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-4 opacity-50 grayscale hover:grayscale-0 transition-all" />

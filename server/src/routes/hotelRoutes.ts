@@ -12,7 +12,7 @@ router.get('/hotels/:id', asyncHandler(hotelController.getHotel));
 router.post(
   '/hotels',
   requireAuth,
-  requireRole(['admin']),
+  requireRole(['hotel_owner']),
   [
     body('name').trim().notEmpty(),
     body('city').trim().notEmpty(),
@@ -29,7 +29,7 @@ router.post(
 router.put(
   '/hotels/:id',
   requireAuth,
-  requireRole(['admin']),
+  requireRole(['hotel_owner']),
   [
     body('name').trim().notEmpty(),
     body('city').trim().notEmpty(),
@@ -43,6 +43,6 @@ router.put(
   ],
   asyncHandler(hotelController.updateHotel),
 );
-router.delete('/hotels/:id', requireAuth, requireRole(['admin']), asyncHandler(hotelController.deleteHotel));
+router.delete('/hotels/:id', requireAuth, requireRole(['hotel_owner']), asyncHandler(hotelController.deleteHotel));
 
 export default router;

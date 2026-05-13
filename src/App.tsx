@@ -14,6 +14,8 @@ import RegisterPage from '@/pages/RegisterPage';
 import BookingHistoryPage from '@/pages/account/BookingHistoryPage';
 import SupportPage from '@/pages/SupportPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import HotelOwnerDashboardPage from '@/pages/admin/HotelOwnerDashboardPage';
+import HotelStaffDashboardPage from '@/pages/admin/HotelStaffDashboardPage';
 import PopularHotelsPage from '@/pages/PopularHotelsPage';
 import LoyaltyPage from '@/pages/LoyaltyPage';
 import ProtectedRoute from '@/components/app/ProtectedRoute';
@@ -59,7 +61,7 @@ function AppContent() {
       <Route
         path="/support"
         element={(
-          <ProtectedRoute roles={['customer', 'admin']}>
+          <ProtectedRoute roles={['customer', 'admin', 'hotel_owner', 'hotel_staff']}>
             <SupportPage />
           </ProtectedRoute>
         )}
@@ -69,6 +71,22 @@ function AppContent() {
         element={(
           <ProtectedRoute roles={['admin']}>
             <AdminDashboardPage />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/owner"
+        element={(
+          <ProtectedRoute roles={['hotel_owner']}>
+            <HotelOwnerDashboardPage />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/staff"
+        element={(
+          <ProtectedRoute roles={['hotel_staff']}>
+            <HotelStaffDashboardPage />
           </ProtectedRoute>
         )}
       />

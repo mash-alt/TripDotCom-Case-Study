@@ -1,4 +1,4 @@
-export type UserRole = 'customer' | 'admin';
+export type UserRole = 'customer' | 'admin' | 'hotel_owner' | 'hotel_staff';
 
 export interface SessionUser {
   id: number;
@@ -8,6 +8,7 @@ export interface SessionUser {
   phoneNumber?: string | null;
   loyaltyPoints?: number;
   membershipLevel?: 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Diamond+' | 'Black Diamond';
+  ownerId?: number | null;
   createdAt?: string | Date;
 }
 
@@ -18,7 +19,7 @@ export interface AuthSession {
 
 export interface HotelSummary {
   id: number;
-  adminId: number;
+  ownerId: number;
   name: string;
   city: string;
   country: string;
@@ -93,7 +94,8 @@ export interface SupportTicket {
   supportId: number;
   customerId: number;
   bookingId: number | null;
-  adminId: number | null;
+  resolverId: number | null;
+  resolverType: 'admin' | 'hotel_owner' | 'hotel_staff' | null;
   subject: string;
   message: string;
   status: 'Open' | 'InProgress' | 'Resolved';

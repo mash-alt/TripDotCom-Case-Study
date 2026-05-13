@@ -7,15 +7,28 @@
 USE tripdotcom;
 
 -- ============================================================
--- ADMINS (Hotel Owners)
+-- HOTEL OWNERS
 -- Password for all: Password123!
 -- ============================================================
-INSERT INTO admins (full_name, email, password_hash) VALUES
+INSERT INTO hotel_owners (full_name, email, password_hash) VALUES
 ('Maria Santos',    'maria@tripstay.com',    '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
 ('James Rodriguez', 'james@tripstay.com',    '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
 ('Li Wei Chen',     'liwei@tripstay.com',    '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
 ('Sophie Laurent',  'sophie@tripstay.com',   '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
 ('Kenji Tanaka',    'kenji@tripstay.com',    '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS');
+
+-- ============================================================
+-- HOTEL STAFF (Under Hotel Owners)
+-- Password for all: Password123!
+-- Staff can manage bookings, check-in/out, and support tickets
+-- but CANNOT create or manage hotels
+-- ============================================================
+INSERT INTO hotel_staff (owner_id, full_name, email, password_hash) VALUES
+(1, 'Ana Reyes',       'ana@tripstay.com',      '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
+(1, 'Marco Dizon',     'marco@tripstay.com',    '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
+(2, 'Rosa Lim',        'rosa@tripstay.com',     '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
+(3, 'Paolo Garcia',    'paolo@tripstay.com',    '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS'),
+(5, 'Yuki Sato',       'yuki@tripstay.com',     '$2b$10$RnHLQRSj/Cp3CuQh7GStyOytxbhi47DZPJv2nZ9Q8ZQC2F3dR10qS');
 
 -- ============================================================
 -- CUSTOMERS (Regular Users)
@@ -52,44 +65,44 @@ INSERT INTO loyalty (customer_id, points, membership_level) VALUES
 -- HOTELS
 -- ============================================================
 INSERT INTO hotels (admin_id, name, city, country, address, description, star_rating, review_score, reviews_count) VALUES
--- Maria's hotels
-(2, 'The Grand Manila',       'Manila',     'Philippines', '123 Roxas Blvd, Ermita, Manila',
+-- Maria's hotels (owner_id 1)
+(1, 'The Grand Manila',       'Manila',     'Philippines', '123 Roxas Blvd, Ermita, Manila',
  'A luxurious 5-star hotel in the heart of Manila offering stunning bay views, world-class dining, and impeccable service. Features an infinity pool, full-service spa, and exclusive rooftop lounge.',
  5, 4.80, 342),
 
-(2, 'Boracay Sunset Resort',  'Boracay',    'Philippines', 'Station 1, Boracay Island, Malay, Aklan',
+(1, 'Boracay Sunset Resort',  'Boracay',    'Philippines', 'Station 1, Boracay Island, Malay, Aklan',
  'A beachfront paradise on the famous White Beach. Wake up to crystal-clear turquoise waters and powdery white sand. Perfect for couples and families seeking a tropical escape.',
  4, 4.65, 218),
 
--- James's hotels
-(3, 'Cebu Ocean Park Hotel',  'Cebu',       'Philippines', '456 Mactan Newtown, Lapu-Lapu City, Cebu',
+-- James's hotels (owner_id 2)
+(2, 'Cebu Ocean Park Hotel',  'Cebu',       'Philippines', '456 Mactan Newtown, Lapu-Lapu City, Cebu',
  'Modern oceanfront hotel steps away from Cebu Ocean Park. Features contemporary rooms with ocean views, multiple restaurants, and direct beach access. Ideal base for island-hopping adventures.',
  4, 4.50, 156),
 
-(3, 'Palawan Eco Lodge',      'Puerto Princesa', 'Philippines', '789 Honda Bay Road, Puerto Princesa, Palawan',
+(2, 'Palawan Eco Lodge',      'Puerto Princesa', 'Philippines', '789 Honda Bay Road, Puerto Princesa, Palawan',
  'An eco-friendly lodge surrounded by lush tropical forest and pristine beaches. Experience sustainable luxury with nature tours, kayaking, and underground river excursions included.',
  3, 4.70, 89),
 
--- Li Wei's hotels
-(4, 'Skyline Suites BGC',     'Taguig',     'Philippines', '321 High Street South, BGC, Taguig',
+-- Li Wei's hotels (owner_id 3)
+(3, 'Skyline Suites BGC',     'Taguig',     'Philippines', '321 High Street South, BGC, Taguig',
  'Ultra-modern serviced suites in the vibrant Bonifacio Global City. Floor-to-ceiling windows offer breathtaking city skylines. Walking distance to upscale shopping, dining, and nightlife.',
  5, 4.85, 275),
 
-(4, 'Baguio Pines Hotel',     'Baguio',     'Philippines', '654 Session Road, Baguio City',
+(3, 'Baguio Pines Hotel',     'Baguio',     'Philippines', '654 Session Road, Baguio City',
  'A charming mountain retreat in the cool City of Pines. Heritage architecture meets modern comfort. Features cozy fireplaces, a garden café, and panoramic views of the Cordillera mountains.',
  3, 4.40, 198),
 
--- Sophie's hotels
-(5, 'Siargao Surf House',     'Siargao',    'Philippines', '101 Cloud 9, General Luna, Siargao Island',
+-- Sophie's hotels (owner_id 4)
+(4, 'Siargao Surf House',     'Siargao',    'Philippines', '101 Cloud 9, General Luna, Siargao Island',
  'A laid-back surfer\'s paradise steps from the legendary Cloud 9 break. Offers surf lessons, board rentals, and a vibrant social scene. The perfect blend of adventure and island relaxation.',
  3, 4.55, 134),
 
--- Kenji's hotels
-(6, 'Makati Business Hotel',  'Makati',     'Philippines', '888 Ayala Avenue, Makati City',
+-- Kenji's hotels (owner_id 5)
+(5, 'Makati Business Hotel',  'Makati',     'Philippines', '888 Ayala Avenue, Makati City',
  'A sleek business hotel in Makati\'s financial district. Features state-of-the-art meeting rooms, high-speed WiFi, executive lounge, and easy access to Greenbelt and Glorietta malls.',
  4, 4.35, 310),
 
-(6, 'Tagaytay Ridge Inn',     'Tagaytay',   'Philippines', '222 Aguinaldo Highway, Tagaytay City',
+(5, 'Tagaytay Ridge Inn',     'Tagaytay',   'Philippines', '222 Aguinaldo Highway, Tagaytay City',
  'A boutique inn perched on the Tagaytay ridge with mesmerizing views of Taal Volcano and lake. Features an acclaimed restaurant, infinity pool, and lush tropical gardens.',
  4, 4.60, 167);
 
@@ -234,10 +247,10 @@ INSERT INTO refunds (booking_id, amount, refund_status, reason, requested_at, pr
 -- ============================================================
 -- SUPPORT TICKETS
 -- ============================================================
-INSERT INTO support_tickets (customer_id, booking_id, admin_id, subject, message, ticket_status, resolution_notes) VALUES
-(1, 1,  NULL, 'Room upgrade request',         'Hi, I was wondering if it is possible to upgrade my Deluxe Bay View room to the Premier Suite for my stay on May 15-18? Thank you!', 'Open', NULL),
-(3, 4,  1,    'Early check-in request',       'Can I check in at 10 AM instead of the standard 2 PM? My flight arrives early morning.', 'Resolved', 'Approved early check-in at 10 AM. Room was ready.'),
-(6, 7,  1,    'Refund status inquiry',         'I cancelled my booking due to a weather advisory. When will my refund be processed?', 'Resolved', 'Refund has been processed to original payment method. Please allow 3-5 business days.'),
-(9, 10, NULL, 'Missing amenities in room',     'The room was great but the minibar was not restocked and the reading lamp was not working.', 'Open', NULL);
+INSERT INTO support_tickets (customer_id, booking_id, resolver_id, resolver_type, subject, message, ticket_status, resolution_notes) VALUES
+(1, 1,  NULL, NULL, 'Room upgrade request',         'Hi, I was wondering if it is possible to upgrade my Deluxe Bay View room to the Premier Suite for my stay on May 15-18? Thank you!', 'Open', NULL),
+(3, 4,  1,    'admin',    'Early check-in request',       'Can I check in at 10 AM instead of the standard 2 PM? My flight arrives early morning.', 'Resolved', 'Approved early check-in at 10 AM. Room was ready.'),
+(6, 7,  1,    'admin',    'Refund status inquiry',         'I cancelled my booking due to a weather advisory. When will my refund be processed?', 'Resolved', 'Refund has been processed to original payment method. Please allow 3-5 business days.'),
+(9, 10, NULL, NULL, 'Missing amenities in room',     'The room was great but the minibar was not restocked and the reading lamp was not working.', 'Open', NULL);
 
 SELECT '✅ Seed data inserted successfully!' AS status;

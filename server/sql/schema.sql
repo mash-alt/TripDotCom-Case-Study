@@ -9,6 +9,24 @@ CREATE TABLE IF NOT EXISTS admins (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS hotel_owners (
+  owner_id INT PRIMARY KEY AUTO_INCREMENT,
+  full_name VARCHAR(120) NOT NULL,
+  email VARCHAR(190) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS hotel_staff (
+  staff_id INT PRIMARY KEY AUTO_INCREMENT,
+  owner_id INT NOT NULL,
+  full_name VARCHAR(120) NOT NULL,
+  email VARCHAR(190) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_staff_owner FOREIGN KEY (owner_id) REFERENCES hotel_owners(owner_id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS customers (
   customer_id INT PRIMARY KEY AUTO_INCREMENT,
   full_name VARCHAR(120) NOT NULL,
@@ -40,7 +58,7 @@ CREATE TABLE IF NOT EXISTS hotels (
   review_score DECIMAL(3, 2) NOT NULL DEFAULT 0,
   reviews_count INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_hotel_admin FOREIGN KEY (admin_id) REFERENCES admins(admin_id) ON DELETE RESTRICT
+  CONSTRAINT fk_hotel_owner FOREIGN KEY (admin_id) REFERENCES hotel_owners(owner_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS hotel_images (
@@ -126,7 +144,8 @@ CREATE TABLE IF NOT EXISTS support_tickets (
   support_id INT PRIMARY KEY AUTO_INCREMENT,
   customer_id INT NOT NULL,
   booking_id INT NULL,
-  admin_id INT NULL,
+  resolver_id INT NULL,
+  resolver_type ENUM('admin', 'hotel_owner', 'hotel_staff') NULL,
   subject VARCHAR(160) NOT NULL,
   message TEXT NOT NULL,
   ticket_status ENUM('Open', 'InProgress', 'Resolved') NOT NULL DEFAULT 'Open',
@@ -134,8 +153,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_support_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
-  CONSTRAINT fk_support_booking FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE SET NULL,
-  CONSTRAINT fk_support_admin FOREIGN KEY (admin_id) REFERENCES admins(admin_id) ON DELETE SET NULL
+  CONSTRAINT fk_support_booking FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE SET NULL
 );
 
 INSERT INTO admins (full_name, email, password_hash)

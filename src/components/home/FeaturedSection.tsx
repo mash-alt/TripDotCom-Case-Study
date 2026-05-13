@@ -86,7 +86,7 @@ export default function FeaturedSection({ hotels }: FeaturedSectionProps) {
         >
           <div className="relative z-10 max-w-2xl">
             <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight">Unlock Secret Deals of Up to 40% Off</h2>
-            <p className="text-lg md:text-xl text-blue-100 mb-8 font-medium">Join our TripStay Rewards program and start saving on your next journey. Exclusive member rates across our global hotel network.</p>
+            <p className="text-lg md:text-xl text-blue-100 mb-8 font-medium">Join our Trip.com Rewards program and start saving on your next journey. Exclusive member rates across our global hotel network.</p>
             <div className="flex flex-wrap gap-4">
               <Link 
                 to={user ? "/loyalty" : "/register"} 

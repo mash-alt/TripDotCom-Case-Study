@@ -10,7 +10,6 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [role, setRole] = useState<'customer' | 'admin'>('customer');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,7 +23,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await login({ ...formData, role });
+      await login(formData);
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to sign in.');
@@ -65,11 +64,6 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
-            <div className="grid grid-cols-2 gap-3">
-              <button type="button" onClick={() => setRole('customer')} className={`rounded-2xl py-3 font-bold border ${role === 'customer' ? 'bg-primary text-white border-primary' : 'border-gray-200 text-gray-600'}`}>Customer</button>
-              <button type="button" onClick={() => setRole('admin')} className={`rounded-2xl py-3 font-bold border ${role === 'admin' ? 'bg-primary text-white border-primary' : 'border-gray-200 text-gray-600'}`}>Admin</button>
-            </div>
-
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Email Address</label>
               <div className="relative">

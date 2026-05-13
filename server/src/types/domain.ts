@@ -1,10 +1,11 @@
-export type UserRole = 'customer' | 'admin';
+export type UserRole = 'customer' | 'admin' | 'hotel_owner' | 'hotel_staff';
 
 export interface AuthUser {
   id: number;
   role: UserRole;
   fullName: string;
   email: string;
+  ownerId?: number | null;
 }
 
 export interface LoyaltySummary {

@@ -19,10 +19,10 @@ router.post(
   ],
   asyncHandler(bookingController.createBooking),
 );
-router.get('/bookings', requireRole(['admin']), asyncHandler(bookingController.listAllBookings));
+router.get('/bookings', requireRole(['admin', 'hotel_owner', 'hotel_staff']), asyncHandler(bookingController.listAllBookings));
 router.get('/bookings/:customerId', asyncHandler(bookingController.listCustomerBookings));
-router.patch('/bookings/:id/check-in', requireRole(['admin']), asyncHandler(bookingController.checkInBooking));
-router.patch('/bookings/:id/complete', requireRole(['admin']), asyncHandler(bookingController.completeBooking));
+router.patch('/bookings/:id/check-in', requireRole(['admin', 'hotel_owner', 'hotel_staff']), asyncHandler(bookingController.checkInBooking));
+router.patch('/bookings/:id/complete', requireRole(['admin', 'hotel_owner', 'hotel_staff']), asyncHandler(bookingController.completeBooking));
 router.patch(
   '/bookings/:id/cancel',
   [body('reason').optional().isString(), validateRequest],
@@ -30,10 +30,10 @@ router.patch(
 );
 router.patch(
   '/bookings/:id/notes',
-  requireRole(['admin']),
+  requireRole(['admin', 'hotel_owner', 'hotel_staff']),
   [body('notes').isString(), validateRequest],
   asyncHandler(bookingController.updateInternalNotes),
 );
-router.delete('/bookings/:id', requireRole(['admin']), asyncHandler(bookingController.deleteBooking));
+router.delete('/bookings/:id', requireRole(['admin', 'hotel_owner', 'hotel_staff']), asyncHandler(bookingController.deleteBooking));
 
 export default router;

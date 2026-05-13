@@ -91,7 +91,7 @@ export default function LoyaltyPage() {
               className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-blue-300 text-sm font-bold mb-8"
             >
               <Award className="w-4 h-4" />
-              TripStay Rewards Program
+              Trip.com Rewards Program
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -266,7 +266,7 @@ export default function LoyaltyPage() {
             </div>
             
             <div className="order-1 lg:order-2">
-              <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">Why Join TripStay Rewards?</h2>
+              <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">Why Join Trip.com Rewards?</h2>
               <p className="text-lg text-gray-500 font-medium mb-8">We believe every journey should be rewarded. That&apos;s why we created the most transparent and rewarding loyalty program in the industry.</p>
               
               <ul className="space-y-4 mb-10">

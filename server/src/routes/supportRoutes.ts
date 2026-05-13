@@ -22,10 +22,10 @@ router.post(
 );
 router.patch(
   '/support/:id',
-  requireRole(['admin']),
+  requireRole(['admin', 'hotel_owner', 'hotel_staff']),
   [body('status').isIn(['InProgress', 'Resolved']), validateRequest],
   asyncHandler(supportController.resolveSupportTicket),
 );
-router.delete('/support/:id', requireRole(['admin']), asyncHandler(supportController.deleteSupportTicket));
+router.delete('/support/:id', requireRole(['admin', 'hotel_owner', 'hotel_staff']), asyncHandler(supportController.deleteSupportTicket));
 
 export default router;

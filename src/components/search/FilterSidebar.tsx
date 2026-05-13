@@ -64,7 +64,7 @@ export default function FilterSidebar({ maxPrice, stars, onMaxPriceChange, onSta
       </div>
 
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 text-white overflow-hidden relative">
-        <h4 className="font-bold mb-2 relative z-10">TripStay Rewards</h4>
+        <h4 className="font-bold mb-2 relative z-10">Trip.com Rewards</h4>
         <p className="text-xs text-gray-400 mb-4 relative z-10 transition-colors">Book directly and earn points you can redeem on your next hotel stay.</p>
         <button className="bg-white text-gray-900 text-xs font-bold px-4 py-2 rounded-lg relative z-10">Learn More</button>
         <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2" />

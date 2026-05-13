@@ -1,8 +1,9 @@
 import * as supportModel from '../models/supportModel.js';
+import type { UserRole } from '../types/domain.js';
 import { ApiError } from '../utils/apiError.js';
 
-export async function listSupportTickets(customerId?: number, adminId?: number) {
-  return supportModel.listSupportTickets({ customerId, adminId });
+export async function listSupportTickets(customerId?: number, ownerId?: number) {
+  return supportModel.listSupportTickets({ customerId, ownerId });
 }
 
 export async function createSupportTicket(input: {
@@ -18,11 +19,17 @@ export async function createSupportTicket(input: {
 
 export async function resolveSupportTicket(input: {
   supportId: number;
-  adminId: number;
+  resolverId: number;
+  resolverType: UserRole;
   status: 'InProgress' | 'Resolved';
   resolutionNotes?: string;
 }) {
-  await supportModel.updateSupportTicket(input.supportId, input);
+  await supportModel.updateSupportTicket(input.supportId, {
+    status: input.status,
+    resolverId: input.resolverId,
+    resolverType: input.resolverType,
+    resolutionNotes: input.resolutionNotes,
+  });
   const tickets = await supportModel.listSupportTickets({});
   const ticket = tickets.find((item) => item.supportId === input.supportId);
 

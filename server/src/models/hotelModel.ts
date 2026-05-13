@@ -3,7 +3,7 @@ import { query } from '../config/db.js';
 
 export interface HotelListRow extends RowDataPacket {
   id: number;
-  adminId: number;
+  ownerId: number;
   name: string;
   city: string;
   country: string;
@@ -28,7 +28,7 @@ export interface AmenityRow extends RowDataPacket {
   amenityName: string;
 }
 
-export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number; adminId?: number }) {
+export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number; ownerId?: number }) {
   const conditions = ['1 = 1'];
   const params: Record<string, unknown> = {};
 
@@ -52,15 +52,15 @@ export async function listHotels(filters: { search?: string; city?: string; maxP
     params.maxPrice = filters.maxPrice;
   }
 
-  if (filters.adminId) {
-    conditions.push('h.admin_id = :adminId');
-    params.adminId = filters.adminId;
+  if (filters.ownerId) {
+    conditions.push('h.admin_id = :ownerId');
+    params.ownerId = filters.ownerId;
   }
 
   return query<HotelListRow[]>(
     `SELECT
       h.hotel_id AS id,
-      h.admin_id AS adminId,
+      h.admin_id AS ownerId,
       h.name,
       h.city,
       h.country,
@@ -90,7 +90,7 @@ export async function getHotelById(hotelId: number) {
   const rows = await query<HotelDetailRow[]>(
     `SELECT
       h.hotel_id AS id,
-      h.admin_id AS adminId,
+      h.admin_id AS ownerId,
       h.name,
       h.city,
       h.country,
@@ -140,7 +140,7 @@ export async function getHotelAmenities(hotelId: number) {
 
 export async function createHotel(
   input: {
-    adminId: number;
+    ownerId: number;
     name: string;
     city: string;
     country: string;
@@ -156,7 +156,7 @@ export async function createHotel(
     `INSERT INTO hotels (admin_id, name, city, country, address, description, star_rating, review_score, reviews_count)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      input.adminId,
+      input.ownerId,
       input.name,
       input.city,
       input.country,

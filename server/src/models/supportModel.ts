@@ -1,11 +1,13 @@
 import type { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import type { UserRole } from '../types/domain.js';
 import { query } from '../config/db.js';
 
 export interface SupportRow extends RowDataPacket {
   supportId: number;
   customerId: number;
   bookingId: number | null;
-  adminId: number | null;
+  resolverId: number | null;
+  resolverType: UserRole | null;
   subject: string;
   message: string;
   status: 'Open' | 'InProgress' | 'Resolved';
@@ -14,13 +16,14 @@ export interface SupportRow extends RowDataPacket {
   updatedAt: Date;
 }
 
-export async function listSupportTickets(filters: { customerId?: number; adminId?: number }) {
+export async function listSupportTickets(filters: { customerId?: number; ownerId?: number }) {
   const params: unknown[] = [];
   let sql = `SELECT
       st.support_id AS supportId,
       st.customer_id AS customerId,
       st.booking_id AS bookingId,
-      st.admin_id AS adminId,
+      st.resolver_id AS resolverId,
+      st.resolver_type AS resolverType,
       st.subject,
       st.message,
       st.ticket_status AS status,
@@ -39,10 +42,9 @@ export async function listSupportTickets(filters: { customerId?: number; adminId
     params.push(filters.customerId);
   }
 
-  if (filters.adminId && filters.adminId !== 1) {
-    // Only show tickets related to hotels managed by this admin
+  if (filters.ownerId) {
     conditions.push('h.admin_id = ?');
-    params.push(filters.adminId);
+    params.push(filters.ownerId);
   }
 
   if (conditions.length > 0) {
@@ -80,15 +82,16 @@ export async function updateSupportTicket(
   supportId: number,
   input: {
     status: SupportRow['status'];
-    adminId: number;
+    resolverId: number;
+    resolverType: UserRole;
     resolutionNotes?: string | null;
   },
 ) {
   await query<ResultSetHeader>(
     `UPDATE support_tickets
-     SET ticket_status = ?, admin_id = ?, resolution_notes = ?, updated_at = NOW()
+     SET ticket_status = ?, resolver_id = ?, resolver_type = ?, resolution_notes = ?, updated_at = NOW()
      WHERE support_id = ?`,
-    [input.status, input.adminId, input.resolutionNotes ?? null, supportId],
+    [input.status, input.resolverId, input.resolverType, input.resolutionNotes ?? null, supportId],
   );
 }
 

@@ -43,8 +43,13 @@ export default function Navbar() {
           {user?.role === 'customer' && (
             <Link to="/bookings" className={cn('nav-link', !isScrolled && isHome && 'text-white/90 hover:text-white')}>My Bookings</Link>
           )}
-          {user?.role === 'admin' && (
-            <Link to="/admin" className={cn('nav-link', !isScrolled && isHome && 'text-white/90 hover:text-white')}>Admin</Link>
+          {(user?.role === 'admin' || user?.role === 'hotel_owner' || user?.role === 'hotel_staff') && (
+            <Link 
+              to={user.role === 'admin' ? '/admin' : user.role === 'hotel_owner' ? '/owner' : '/staff'} 
+              className={cn('nav-link', !isScrolled && isHome && 'text-white/90 hover:text-white')}
+            >
+              Dashboard
+            </Link>
           )}
           <Link to="/support" className={cn('nav-link', !isScrolled && isHome && 'text-white/90 hover:text-white')}>Support</Link>
           {(!isAuthenticated || user?.role === 'customer') && (
@@ -75,7 +80,10 @@ export default function Navbar() {
                       {user.fullName}
                     </span>
                     <span className={cn('text-[10px] font-medium leading-tight', !isScrolled && isHome ? 'text-white/70' : 'text-gray-500')}>
-                      {user.role === 'admin' ? 'Admin' : user.membershipLevel ?? 'Member'}
+                      {user.role === 'admin' ? 'System Admin' : 
+                       user.role === 'hotel_owner' ? 'Hotel Owner' : 
+                       user.role === 'hotel_staff' ? 'Hotel Staff' : 
+                       user.membershipLevel ?? 'Member'}
                     </span>
                   </div>
                 </button>
@@ -98,6 +106,18 @@ export default function Navbar() {
                         <Link to="/admin" onClick={() => setShowDropdown(false)} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">
                           <ShieldCheck className="w-4 h-4" />
                           Admin Dashboard
+                        </Link>
+                      )}
+                      {user.role === 'hotel_owner' && (
+                        <Link to="/owner" onClick={() => setShowDropdown(false)} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">
+                          <ShieldCheck className="w-4 h-4" />
+                          Owner Dashboard
+                        </Link>
+                      )}
+                      {user.role === 'hotel_staff' && (
+                        <Link to="/staff" onClick={() => setShowDropdown(false)} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">
+                          <ShieldCheck className="w-4 h-4" />
+                          Staff Dashboard
                         </Link>
                       )}
                       <Link to="/support" onClick={() => setShowDropdown(false)} className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">

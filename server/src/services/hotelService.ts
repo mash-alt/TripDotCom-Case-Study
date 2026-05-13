@@ -7,7 +7,7 @@ async function enrichHotelSummary(row: hotelModel.HotelListRow) {
   const amenities = await hotelModel.getHotelAmenities(row.id);
   return {
     id: row.id,
-    adminId: row.adminId,
+    ownerId: row.ownerId,
     name: row.name,
     city: row.city,
     country: row.country,
@@ -23,7 +23,7 @@ async function enrichHotelSummary(row: hotelModel.HotelListRow) {
   };
 }
 
-export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number; adminId?: number }) {
+export async function listHotels(filters: { search?: string; city?: string; maxPrice?: number; stars?: number; ownerId?: number }) {
   const hotels = await hotelModel.listHotels(filters);
   return Promise.all(hotels.map((hotel) => enrichHotelSummary(hotel)));
 }
@@ -61,7 +61,7 @@ export async function getHotel(hotelId: number) {
 
   return {
     id: hotel.id,
-    adminId: hotel.adminId,
+    ownerId: hotel.ownerId,
     name: hotel.name,
     city: hotel.city,
     country: hotel.country,
@@ -80,7 +80,7 @@ export async function getHotel(hotelId: number) {
 }
 
 export async function createHotel(input: {
-  adminId: number;
+  ownerId: number;
   name: string;
   city: string;
   country: string;
@@ -95,7 +95,7 @@ export async function createHotel(input: {
   const hotelId = await withTransaction(async (connection) => {
     const newHotelId = await hotelModel.createHotel(
       {
-        adminId: input.adminId,
+        ownerId: input.ownerId,
         name: input.name,
         city: input.city,
         country: input.country,
@@ -130,7 +130,8 @@ export async function updateHotel(
     images: string[];
     amenities: string[];
   },
-  adminId: number,
+  ownerId: number,
+  role: string,
 ) {
   const existingHotel = await hotelModel.getHotelById(hotelId);
 
@@ -138,7 +139,7 @@ export async function updateHotel(
     throw new ApiError(404, 'Hotel not found.');
   }
 
-  if (existingHotel.adminId !== adminId && adminId !== 1) {
+  if (existingHotel.ownerId !== ownerId) {
     throw new ApiError(403, 'You do not have permission to modify this hotel.');
   }
 
@@ -160,14 +161,14 @@ export async function updateHotel(
   return getHotel(hotelId);
 }
 
-export async function deleteHotel(hotelId: number, adminId: number) {
+export async function deleteHotel(hotelId: number, ownerId: number) {
   const existingHotel = await hotelModel.getHotelById(hotelId);
 
   if (!existingHotel) {
     throw new ApiError(404, 'Hotel not found.');
   }
 
-  if (existingHotel.adminId !== adminId && adminId !== 1) {
+  if (existingHotel.ownerId !== ownerId) {
     throw new ApiError(403, 'You do not have permission to delete this hotel.');
   }
 

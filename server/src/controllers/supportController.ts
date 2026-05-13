@@ -2,9 +2,17 @@ import type { Request, Response } from 'express';
 import * as supportService from '../services/supportService.js';
 
 export async function listSupportTickets(request: Request, response: Response) {
-  const customerId = request.user!.role === 'customer' ? request.user!.id : undefined;
-  const adminId = request.user!.role === 'admin' && request.user!.id !== 1 ? request.user!.id : undefined;
-  response.json(await supportService.listSupportTickets(customerId, adminId));
+  const { role, id, ownerId } = request.user!;
+  const customerId = role === 'customer' ? id : undefined;
+
+  let scopedOwnerId: number | undefined;
+  if (role === 'hotel_owner') {
+    scopedOwnerId = id;
+  } else if (role === 'hotel_staff') {
+    scopedOwnerId = ownerId ?? undefined;
+  }
+
+  response.json(await supportService.listSupportTickets(customerId, scopedOwnerId));
 }
 
 export async function createSupportTicket(request: Request, response: Response) {
@@ -20,7 +28,8 @@ export async function resolveSupportTicket(request: Request, response: Response)
   response.json(
     await supportService.resolveSupportTicket({
       supportId: Number(request.params.id),
-      adminId: request.user!.id,
+      resolverId: request.user!.id,
+      resolverType: request.user!.role as 'admin' | 'hotel_owner' | 'hotel_staff',
       status: request.body.status,
       resolutionNotes: request.body.resolutionNotes,
     }),

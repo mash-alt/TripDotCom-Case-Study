@@ -87,7 +87,7 @@ async function main() {
   // Step 5 — Show summary
   console.log('\n📊 Database Summary:');
   const tables = [
-    'admins', 'customers', 'loyalty', 'hotels',
+    'admins', 'hotel_owners', 'hotel_staff', 'customers', 'loyalty', 'hotels',
     'hotel_images', 'hotel_amenities', 'rooms', 'room_amenities',
     'bookings', 'payments', 'refunds', 'support_tickets',
   ];
@@ -103,13 +103,22 @@ async function main() {
   console.log('');
   console.log('🔑 Test Accounts (password for ALL: Password123!)');
   console.log('─'.repeat(55));
-  console.log('   HOTEL OWNERS (Admins):');
-  console.log('     admin@tripstay.com   (System Admin - from schema)');
-  console.log('     maria@tripstay.com   (Maria Santos)');
-  console.log('     james@tripstay.com   (James Rodriguez)');
-  console.log('     liwei@tripstay.com   (Li Wei Chen)');
-  console.log('     sophie@tripstay.com  (Sophie Laurent)');
-  console.log('     kenji@tripstay.com   (Kenji Tanaka)');
+  console.log('   SYSTEM ADMIN:');
+  console.log('     admin@tripstay.com   (System Admin)');
+  console.log('');
+  console.log('   HOTEL OWNERS:');
+  console.log('     maria@tripstay.com   (Maria Santos - The Grand Manila, Boracay Sunset Resort)');
+  console.log('     james@tripstay.com   (James Rodriguez - Cebu Ocean Park Hotel, Palawan Eco Lodge)');
+  console.log('     liwei@tripstay.com   (Li Wei Chen - Skyline Suites BGC, Baguio Pines Hotel)');
+  console.log('     sophie@tripstay.com  (Sophie Laurent - Siargao Surf House)');
+  console.log('     kenji@tripstay.com   (Kenji Tanaka - Makati Business Hotel, Tagaytay Ridge Inn)');
+  console.log('');
+  console.log('   HOTEL STAFF:');
+  console.log('     ana@tripstay.com     (Ana Reyes - under Maria Santos)');
+  console.log('     marco@tripstay.com   (Marco Dizon - under Maria Santos)');
+  console.log('     rosa@tripstay.com    (Rosa Lim - under James Rodriguez)');
+  console.log('     paolo@tripstay.com   (Paolo Garcia - under Li Wei Chen)');
+  console.log('     yuki@tripstay.com    (Yuki Sato - under Kenji Tanaka)');
   console.log('');
   console.log('   CUSTOMERS:');
   console.log('     john@gmail.com       (John Doe)');

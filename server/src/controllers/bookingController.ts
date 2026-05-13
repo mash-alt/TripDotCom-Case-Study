@@ -1,6 +1,10 @@
 import type { Request, Response } from 'express';
 import * as bookingService from '../services/bookingService.js';
 
+function isAdminRole(role: string) {
+  return role === 'admin' || role === 'hotel_owner' || role === 'hotel_staff';
+}
+
 export async function createBooking(request: Request, response: Response) {
   response.status(201).json(
     await bookingService.createBooking({
@@ -14,7 +18,7 @@ export async function createBooking(request: Request, response: Response) {
 export async function listCustomerBookings(request: Request, response: Response) {
   try {
     const requestedCustomerId = Number(request.params.customerId);
-    const customerId = request.user!.role === 'admin' ? requestedCustomerId : request.user!.id;
+    const customerId = isAdminRole(request.user!.role) ? requestedCustomerId : request.user!.id;
     response.json(await bookingService.listBookings(customerId));
   } catch (err) {
     console.error('Error in listCustomerBookings:', err);
@@ -24,7 +28,17 @@ export async function listCustomerBookings(request: Request, response: Response)
 
 export async function listAllBookings(request: Request, response: Response) {
   try {
-    const adminId = request.user!.id === 1 ? undefined : request.user!.id;
+    const { role, id, ownerId } = request.user!;
+    let adminId: number | undefined;
+
+    if (role === 'admin') {
+      adminId = undefined;
+    } else if (role === 'hotel_owner') {
+      adminId = id;
+    } else if (role === 'hotel_staff') {
+      adminId = ownerId ?? undefined;
+    }
+
     response.json(await bookingService.listBookings(undefined, adminId));
   } catch (err) {
     console.error('Error in listAllBookings:', err);
