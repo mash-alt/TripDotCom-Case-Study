@@ -11,6 +11,7 @@ import HotelDetailsPage from '@/pages/HotelDetailsPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
+import HotelPartnerAuthPage from '@/pages/HotelPartnerAuthPage';
 import BookingHistoryPage from '@/pages/account/BookingHistoryPage';
 import SupportPage from '@/pages/SupportPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
@@ -50,6 +51,7 @@ function AppContent() {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/internal/hotel-access" element={<HotelPartnerAuthPage />} />
       <Route
         path="/bookings"
         element={(

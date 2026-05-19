@@ -9,6 +9,17 @@ import { ApiError } from '../utils/apiError.js';
 import { signToken } from '../utils/auth.js';
 import type { UserRole } from '../types/domain.js';
 
+async function assertEmailIsAvailable(email: string) {
+  const existingCustomer = await customerModel.findCustomerByEmail(email);
+  const existingAdmin = await adminModel.findAdminByEmail(email);
+  const existingOwner = await hotelOwnerModel.findHotelOwnerByEmail(email);
+  const existingStaff = await hotelStaffModel.findHotelStaffByEmail(email);
+
+  if (existingCustomer || existingAdmin || existingOwner || existingStaff) {
+    throw new ApiError(409, 'An account with this email already exists.');
+  }
+}
+
 async function formatCustomerSession(customer: customerModel.CustomerRow) {
   const loyalty = await loyaltyModel.findLoyaltyByCustomerId(customer.customerId);
 
@@ -94,14 +105,7 @@ export async function registerCustomer(input: {
   phoneNumber?: string;
   password: string;
 }) {
-  const existingCustomer = await customerModel.findCustomerByEmail(input.email);
-  const existingAdmin = await adminModel.findAdminByEmail(input.email);
-  const existingOwner = await hotelOwnerModel.findHotelOwnerByEmail(input.email);
-  const existingStaff = await hotelStaffModel.findHotelStaffByEmail(input.email);
-
-  if (existingCustomer || existingAdmin || existingOwner || existingStaff) {
-    throw new ApiError(409, 'An account with this email already exists.');
-  }
+  await assertEmailIsAvailable(input.email);
 
   const passwordHash = await bcrypt.hash(input.password, 10);
 
@@ -126,6 +130,56 @@ export async function registerCustomer(input: {
   }
 
   return formatCustomerSession(customer);
+}
+
+export async function registerPartner(input: {
+  fullName: string;
+  email: string;
+  password: string;
+  role: 'hotel_owner' | 'hotel_staff';
+  ownerEmail?: string;
+}) {
+  await assertEmailIsAvailable(input.email);
+
+  const passwordHash = await bcrypt.hash(input.password, 10);
+
+  if (input.role === 'hotel_owner') {
+    const ownerId = await hotelOwnerModel.createHotelOwner({
+      fullName: input.fullName,
+      email: input.email,
+      passwordHash,
+    });
+
+    const owner = await hotelOwnerModel.findHotelOwnerById(ownerId);
+    if (!owner) {
+      throw new ApiError(500, 'Unable to create hotel owner account.');
+    }
+
+    return formatHotelOwnerSession(owner);
+  }
+
+  if (!input.ownerEmail?.trim()) {
+    throw new ApiError(400, 'Owner email is required for hotel staff accounts.');
+  }
+
+  const owner = await hotelOwnerModel.findHotelOwnerByEmail(input.ownerEmail.trim());
+  if (!owner) {
+    throw new ApiError(404, 'No hotel owner found with that owner email.');
+  }
+
+  const staffId = await hotelStaffModel.createHotelStaff({
+    ownerId: owner.ownerId,
+    fullName: input.fullName,
+    email: input.email,
+    passwordHash,
+  });
+
+  const staff = await hotelStaffModel.findHotelStaffById(staffId);
+  if (!staff) {
+    throw new ApiError(500, 'Unable to create hotel staff account.');
+  }
+
+  return formatHotelStaffSession(staff);
 }
 
 export async function login(input: { email: string; password: string; role?: UserRole }) {

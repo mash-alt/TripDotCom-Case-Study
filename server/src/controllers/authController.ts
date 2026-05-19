@@ -13,6 +13,12 @@ export async function login(request: Request, response: Response) {
   response.json(session);
 }
 
+export async function registerPartner(request: Request, response: Response) {
+  console.log('[AUTH] Registering partner user:', { ...request.body, password: '***' });
+  const session = await authService.registerPartner(request.body);
+  response.status(201).json(session);
+}
+
 export async function me(request: Request, response: Response) {
   const session = await authService.getMe(request.user!.id, request.user!.role);
   response.json(session);

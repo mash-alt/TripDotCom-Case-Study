@@ -20,6 +20,19 @@ router.post(
 );
 
 router.post(
+  '/register-partner',
+  [
+    body('fullName').trim().notEmpty(),
+    body('email').isEmail(),
+    body('password').isLength({ min: 8 }),
+    body('role').isIn(['hotel_owner', 'hotel_staff']),
+    body('ownerEmail').optional().isEmail(),
+    validateRequest,
+  ],
+  asyncHandler(authController.registerPartner),
+);
+
+router.post(
   '/login',
   [body('email').isEmail(), body('password').notEmpty(), validateRequest],
   asyncHandler(authController.login),

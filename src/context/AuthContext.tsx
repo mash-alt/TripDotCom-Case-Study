@@ -9,7 +9,7 @@ interface AuthContextValue {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (payload: { email: string; password: string; role?: 'customer' | 'admin' }) => Promise<void>;
+  login: (payload: { email: string; password: string; role?: 'customer' | 'admin' | 'hotel_owner' | 'hotel_staff' }) => Promise<void>;
   register: (payload: { fullName: string; email: string; phoneNumber?: string; password: string }) => Promise<void>;
   logout: () => void;
   refreshSession: () => Promise<void>;

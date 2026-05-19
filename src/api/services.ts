@@ -16,7 +16,12 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
-  login: (payload: { email: string; password: string; role?: 'customer' | 'admin' }) =>
+  registerPartner: (payload: { fullName: string; email: string; password: string; role: 'hotel_owner' | 'hotel_staff'; ownerEmail?: string }) =>
+    apiRequest<AuthSession>('/api/register-partner', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  login: (payload: { email: string; password: string; role?: 'customer' | 'admin' | 'hotel_owner' | 'hotel_staff' }) =>
     apiRequest<AuthSession>('/api/login', {
       method: 'POST',
       body: JSON.stringify(payload),

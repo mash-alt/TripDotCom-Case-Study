@@ -1,4 +1,4 @@
-import type { PoolConnection, RowDataPacket } from 'mysql2/promise';
+import type { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { query } from '../config/db.js';
 
 export interface HotelOwnerRow extends RowDataPacket {
@@ -54,4 +54,26 @@ export async function findHotelOwnerById(ownerId: number) {
   );
 
   return rows[0] ?? null;
+}
+
+export async function createHotelOwner(
+  input: { fullName: string; email: string; passwordHash: string },
+  connection?: PoolConnection,
+) {
+  if (connection) {
+    const [result] = await connection.execute<ResultSetHeader>(
+      `INSERT INTO hotel_owners (full_name, email, password_hash)
+       VALUES (?, ?, ?)`,
+      [input.fullName, input.email, input.passwordHash],
+    );
+    return result.insertId;
+  }
+
+  const result = await query<ResultSetHeader>(
+    `INSERT INTO hotel_owners (full_name, email, password_hash)
+     VALUES (?, ?, ?)`,
+    [input.fullName, input.email, input.passwordHash],
+  );
+
+  return result.insertId;
 }
