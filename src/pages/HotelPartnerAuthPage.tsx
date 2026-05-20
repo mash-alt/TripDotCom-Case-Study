@@ -18,6 +18,7 @@ export default function HotelPartnerAuthPage() {
     fullName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     ownerEmail: '',
   });
 
@@ -28,6 +29,12 @@ export default function HotelPartnerAuthPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
+
+    if (mode === 'create' && formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -202,6 +209,24 @@ export default function HotelPartnerAuthPage() {
                   />
                 </div>
               </label>
+
+              {mode === 'create' && (
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Confirm password</span>
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={formData.confirmPassword}
+                      onChange={(event) => setFormData((current) => ({ ...current, confirmPassword: event.target.value }))}
+                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm outline-none transition-colors focus:border-slate-500"
+                      placeholder="Re-enter password"
+                    />
+                  </div>
+                </label>
+              )}
 
               {error && <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
 

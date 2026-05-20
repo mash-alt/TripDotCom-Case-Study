@@ -12,7 +12,7 @@ const emptyHotelForm = {
   country: '',
   address: '',
   description: '',
-  stars: 5,
+  stars: 0,
   rating: 0,
   reviewsCount: 0,
   images: '',
@@ -162,8 +162,8 @@ export default function HotelOwnerDashboardPage() {
       country: hotelForm.country,
       address: hotelForm.address,
       description: hotelForm.description,
-      stars: Number(hotelForm.stars),
-      rating: Number(hotelForm.rating),
+      stars: hotelForm.id ? Number(hotelForm.stars) : 0,
+      rating: hotelForm.id ? Number(hotelForm.rating) : 0,
       reviewsCount: Number(hotelForm.reviewsCount),
       images: hotelForm.images.split(',').map((item) => item.trim()).filter(Boolean),
       amenities: hotelForm.amenities.split(',').map((item) => item.trim()).filter(Boolean),
@@ -264,16 +264,35 @@ export default function HotelOwnerDashboardPage() {
                   </button>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <input value={hotelForm.name} onChange={(e) => setHotelForm((current) => ({ ...current, name: e.target.value }))} placeholder="Hotel name" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input value={hotelForm.address} onChange={(e) => setHotelForm((current) => ({ ...current, address: e.target.value }))} placeholder="Address" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input value={hotelForm.city} onChange={(e) => setHotelForm((current) => ({ ...current, city: e.target.value }))} placeholder="City" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input value={hotelForm.country} onChange={(e) => setHotelForm((current) => ({ ...current, country: e.target.value }))} placeholder="Country" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input type="number" min={1} max={5} value={hotelForm.stars} onChange={(e) => setHotelForm((current) => ({ ...current, stars: Number(e.target.value) }))} placeholder="Stars (1-5)" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input type="number" step="0.1" max={5} value={hotelForm.rating} onChange={(e) => setHotelForm((current) => ({ ...current, rating: Number(e.target.value) }))} placeholder="Rating (0-5)" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Hotel Name</span>
+                    <input value={hotelForm.name} onChange={(e) => setHotelForm((current) => ({ ...current, name: e.target.value }))} placeholder="e.g., Grand Harbor Hotel" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Street Address</span>
+                    <input value={hotelForm.address} onChange={(e) => setHotelForm((current) => ({ ...current, address: e.target.value }))} placeholder="e.g., 123 Seaside Avenue" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">City</span>
+                    <input value={hotelForm.city} onChange={(e) => setHotelForm((current) => ({ ...current, city: e.target.value }))} placeholder="e.g., Cebu City" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Country</span>
+                    <input value={hotelForm.country} onChange={(e) => setHotelForm((current) => ({ ...current, country: e.target.value }))} placeholder="e.g., Philippines" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
                 </div>
-                <textarea value={hotelForm.description} onChange={(e) => setHotelForm((current) => ({ ...current, description: e.target.value }))} placeholder="Description" rows={4} className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium resize-none" />
-                <input value={hotelForm.images} onChange={(e) => setHotelForm((current) => ({ ...current, images: e.target.value }))} placeholder="Image URLs, comma separated" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                <input value={hotelForm.amenities} onChange={(e) => setHotelForm((current) => ({ ...current, amenities: e.target.value }))} placeholder="Amenities, comma separated" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                <label className="block space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Hotel Description</span>
+                  <textarea value={hotelForm.description} onChange={(e) => setHotelForm((current) => ({ ...current, description: e.target.value }))} placeholder="Highlight location, style, and key features." rows={4} className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium resize-none" />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Image URLs</span>
+                  <input value={hotelForm.images} onChange={(e) => setHotelForm((current) => ({ ...current, images: e.target.value }))} placeholder="Add one or more URLs, separated by commas." className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Hotel Amenities</span>
+                  <input value={hotelForm.amenities} onChange={(e) => setHotelForm((current) => ({ ...current, amenities: e.target.value }))} placeholder="e.g., Pool, Free Wi-Fi, Airport Shuttle" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                </label>
                 <button type="submit" className="bg-primary text-white font-bold px-6 py-3 rounded-2xl">
                   {hotelForm.id ? 'Update Hotel' : 'Add Hotel'}
                 </button>
@@ -291,18 +310,51 @@ export default function HotelOwnerDashboardPage() {
                 </div>
                 {selectedHotel ? <p className="text-sm text-gray-500">Editing rooms for {selectedHotel.name}</p> : <p className="text-sm text-gray-400">Select a hotel to manage rooms</p>}
                 <div className="grid md:grid-cols-2 gap-4">
-                  <input value={roomForm.name} onChange={(e) => setRoomForm((current) => ({ ...current, name: e.target.value }))} placeholder="Room name" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input value={roomForm.roomType} onChange={(e) => setRoomForm((current) => ({ ...current, roomType: e.target.value }))} placeholder="Room type" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input value={roomForm.bedType} onChange={(e) => setRoomForm((current) => ({ ...current, bedType: e.target.value }))} placeholder="Bed type" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input type="number" value={roomForm.sizeSqm} onChange={(e) => setRoomForm((current) => ({ ...current, sizeSqm: Number(e.target.value) }))} placeholder="Size sqm" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input type="number" value={roomForm.capacityAdults} onChange={(e) => setRoomForm((current) => ({ ...current, capacityAdults: Number(e.target.value) }))} placeholder="Adult capacity" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input type="number" value={roomForm.capacityChildren} onChange={(e) => setRoomForm((current) => ({ ...current, capacityChildren: Number(e.target.value) }))} placeholder="Child capacity" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input type="number" value={roomForm.pricePerNight} onChange={(e) => setRoomForm((current) => ({ ...current, pricePerNight: Number(e.target.value) }))} placeholder="Price per night (₱)" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                  <input type="number" value={roomForm.totalInventory} onChange={(e) => setRoomForm((current) => ({ ...current, totalInventory: Number(e.target.value) }))} placeholder="Inventory count" className="bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Room Name</span>
+                    <input value={roomForm.name} onChange={(e) => setRoomForm((current) => ({ ...current, name: e.target.value }))} placeholder="e.g., Deluxe King Room" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Room Category</span>
+                    <input value={roomForm.roomType} onChange={(e) => setRoomForm((current) => ({ ...current, roomType: e.target.value }))} placeholder="e.g., Deluxe, Suite, Family" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Bed Configuration</span>
+                    <input value={roomForm.bedType} onChange={(e) => setRoomForm((current) => ({ ...current, bedType: e.target.value }))} placeholder="e.g., 1 King Bed" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Room Size (sqm)</span>
+                    <input type="number" value={roomForm.sizeSqm} onChange={(e) => setRoomForm((current) => ({ ...current, sizeSqm: Number(e.target.value) }))} placeholder="30" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Max Adults</span>
+                    <input type="number" value={roomForm.capacityAdults} onChange={(e) => setRoomForm((current) => ({ ...current, capacityAdults: Number(e.target.value) }))} placeholder="2" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Max Children</span>
+                    <input type="number" value={roomForm.capacityChildren} onChange={(e) => setRoomForm((current) => ({ ...current, capacityChildren: Number(e.target.value) }))} placeholder="1" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Price Per Night (PHP)</span>
+                    <input type="number" value={roomForm.pricePerNight} onChange={(e) => setRoomForm((current) => ({ ...current, pricePerNight: Number(e.target.value) }))} placeholder="3500" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Total Room Inventory</span>
+                    <input type="number" value={roomForm.totalInventory} onChange={(e) => setRoomForm((current) => ({ ...current, totalInventory: Number(e.target.value) }))} placeholder="10" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                  </label>
                 </div>
-                <textarea value={roomForm.description} onChange={(e) => setRoomForm((current) => ({ ...current, description: e.target.value }))} placeholder="Room description" rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium resize-none" />
-                <input value={roomForm.imageUrl} onChange={(e) => setRoomForm((current) => ({ ...current, imageUrl: e.target.value }))} placeholder="Room image URL" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
-                <input value={roomForm.amenities} onChange={(e) => setRoomForm((current) => ({ ...current, amenities: e.target.value }))} placeholder="Room amenities, comma separated" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                <label className="block space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Room Description</span>
+                  <textarea value={roomForm.description} onChange={(e) => setRoomForm((current) => ({ ...current, description: e.target.value }))} placeholder="Describe highlights, view, and in-room features." rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium resize-none" />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Room Image URL</span>
+                  <input value={roomForm.imageUrl} onChange={(e) => setRoomForm((current) => ({ ...current, imageUrl: e.target.value }))} placeholder="https://example.com/room-photo.jpg" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Room Amenities</span>
+                  <input value={roomForm.amenities} onChange={(e) => setRoomForm((current) => ({ ...current, amenities: e.target.value }))} placeholder="e.g., Balcony, Smart TV, Mini Bar" className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 font-medium" />
+                </label>
                 <button type="submit" className="bg-primary text-white font-bold px-6 py-3 rounded-2xl">
                   {roomForm.id ? 'Update Room' : 'Add Room'}
                 </button>
@@ -489,3 +541,4 @@ export default function HotelOwnerDashboardPage() {
     </div>
   );
 }
+
